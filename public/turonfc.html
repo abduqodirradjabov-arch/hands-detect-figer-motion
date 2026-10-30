@@ -1,0 +1,1460 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Turon FC</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Maket: telefon kengligidagi ustun. Tepada hisob, o‘rtada sahifa, pastda 5 tugmali navigatsiya.
+   Ranglar: tungi binafsha fon, yashil-turkuaz (mint) asosiy rang, oltin va pushti urg‘u. Bitta qorong‘i uslub. */
+:root {
+  color-scheme: dark;
+  --bg: #0a0820; --bg2: #1d1050; --panel: rgba(255,255,255,.07); --panel2: rgba(255,255,255,.13); --line: rgba(255,255,255,.15);
+  --ink: #f5f3ff; --muted: #aaa5d8; --mint: #25f0b0; --gold: #ffc93c; --hot: #ff3d85; --blue: #3ea8ff; --violet: #8a5cff;
+  --disp: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif;
+  --body: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: radial-gradient(120% 80% at 50% 0%, var(--bg2), var(--bg) 60%) fixed, var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 15px; line-height: 1.35; overflow: hidden; user-select: none; -webkit-user-select: none;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  touch-action: manipulation;
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+[hidden] { display: none !important; }
+h1, h2, h3, .disp { font-family: var(--disp); text-transform: uppercase; letter-spacing: .03em; margin: 0; font-weight: 800; }
+#app { height: 100%; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; position: relative; }
+
+/* ---------- yuqori panel ---------- */
+.top { display: flex; align-items: center; gap: 10px; padding: 10px 0 8px; }
+.crest { width: 38px; height: 42px; flex: none; }
+.crest svg { width: 100%; height: 100%; display: block; }
+.who { min-width: 0; flex: 1 1 0; display: flex; flex-direction: column; line-height: 1.1; }
+.who b { font-family: var(--disp); font-size: 17px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.who span { font-size: 11.5px; color: var(--muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chips { display: flex; gap: 5px; align-items: center; flex: none; }
+.chip { display: inline-flex; align-items: center; gap: 5px; background: var(--panel); border: 1px solid var(--line); border-radius: 99px; padding: 4px 8px; font-family: var(--disp); font-weight: 700; font-size: 15px; letter-spacing: .02em; }
+.chip i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.chip.coin i { background: radial-gradient(circle at 35% 30%, #fff3b0, var(--gold) 55%, #b07a00); }
+.chip.gem i { background: linear-gradient(135deg, #9bf2ff, var(--blue) 55%, #7a4dff); border-radius: 3px; transform: rotate(45deg) scale(.8); }
+.ibtn { width: 32px; height: 32px; border-radius: 50%; background: var(--panel); border: 1px solid var(--line); display: grid; place-items: center; }
+
+/* ---------- sahifalar ---------- */
+.stage { flex: 1; position: relative; min-height: 0; }
+.screen { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 4px 0 18px; scrollbar-width: none; }
+.screen::-webkit-scrollbar { display: none; }
+.screen.off { display: none; }
+.screen.enter { animation: enter .38s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes enter { from { opacity: 0; transform: translateX(26px) scale(.985); } to { opacity: 1; transform: none; } }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.h-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.h-row h2 { font-size: 26px; }
+.h-row small { color: var(--muted); font-size: 13px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 14px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--disp); font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: .05em; padding: 12px 22px; border-radius: 14px; color: #06281c; background: linear-gradient(180deg, #6bffd0, var(--mint) 60%, #0fc88a); box-shadow: 0 6px 0 #0a8f63, 0 12px 24px rgba(37,240,176,.28); transition: transform .08s, box-shadow .08s; }
+.btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #0a8f63, 0 6px 14px rgba(37,240,176,.25); }
+.btn.gold { color: #3a2500; background: linear-gradient(180deg, #ffe88a, var(--gold) 60%, #e0a010); box-shadow: 0 6px 0 #a87400, 0 12px 24px rgba(255,201,60,.28); }
+.btn.hot { color: #fff; background: linear-gradient(180deg, #ff7bb0, var(--hot) 60%, #d41f64); box-shadow: 0 6px 0 #961847, 0 12px 24px rgba(255,61,133,.28); }
+.btn.ghost { color: var(--ink); background: var(--panel2); box-shadow: none; border: 1px solid var(--line); font-size: 17px; padding: 9px 16px; }
+.btn.small { font-size: 16px; padding: 8px 14px; }
+.btn.wide { width: 100%; }
+.btn[disabled] { filter: grayscale(.9) brightness(.7); box-shadow: none; pointer-events: none; }
+
+/* ---------- navigatsiya ---------- */
+.nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 8px 0 10px; border-top: 1px solid var(--line); background: linear-gradient(180deg, transparent, rgba(0,0,0,.25)); }
+.nav button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; border-radius: 12px; color: var(--muted); font-family: var(--disp); font-weight: 700; font-size: 14px; letter-spacing: .05em; text-transform: uppercase; position: relative; }
+.nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nav button[aria-current="page"] { color: var(--mint); }
+.nav button[aria-current="page"]::before { content: ""; position: absolute; top: -9px; width: 34px; height: 3px; border-radius: 3px; background: var(--mint); box-shadow: 0 0 14px var(--mint); }
+.nav .play { color: #06281c; }
+.nav .play span.pb { width: 54px; height: 54px; margin-top: -22px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(180deg, #6bffd0, var(--mint)); box-shadow: 0 0 0 5px var(--bg), 0 8px 22px rgba(37,240,176,.5); }
+.nav .play svg { stroke: #06281c; fill: #06281c; }
+.nav .play em { font-style: normal; color: var(--mint); }
+.dot { position: absolute; top: 2px; right: 22%; width: 9px; height: 9px; border-radius: 50%; background: var(--hot); box-shadow: 0 0 0 2px var(--bg); }
+
+/* ---------- kirish (splash) ---------- */
+#s-splash { position: fixed; inset: 0; z-index: 30; background: radial-gradient(90% 60% at 50% 38%, #3b1a9c, #150a3d 55%, #07051a); display: grid; place-items: center; overflow: hidden; padding: 0; border-radius: 0; }
+#s-splash.off { display: none; }
+.beams { position: absolute; inset: -40%; background: conic-gradient(from 0deg at 50% 50%, transparent 0 8%, rgba(255,201,60,.16) 10%, transparent 13% 30%, rgba(37,240,176,.15) 32%, transparent 35% 55%, rgba(255,61,133,.15) 57%, transparent 60% 80%, rgba(62,168,255,.16) 82%, transparent 85%); animation: spin 22s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.confetti-bg { position: absolute; inset: 0; pointer-events: none; }
+.confetti-bg i { position: absolute; top: -20px; width: 8px; height: 14px; border-radius: 2px; opacity: .85; animation: fall linear infinite; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+.logo { position: relative; z-index: 2; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.logo .word { display: flex; gap: 2px; font-family: var(--disp); font-weight: 800; font-size: clamp(64px, 20vw, 104px); line-height: .9; letter-spacing: .02em; }
+.logo .word span { display: inline-block; opacity: 0; transform: translateY(40px) scale(.6) rotate(-8deg); animation: pop .7s cubic-bezier(.2,1.4,.3,1) forwards; background: linear-gradient(180deg, #fff6c4, var(--gold) 45%, #e08a00); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 0 #6b3d00) drop-shadow(0 0 18px rgba(255,201,60,.55)); }
+@keyframes pop { to { opacity: 1; transform: none; } }
+.logo .fc { font-family: var(--disp); font-weight: 800; font-size: 34px; letter-spacing: .3em; padding: 2px 18px 2px 24px; border-radius: 10px; background: linear-gradient(90deg, var(--hot), var(--violet)); color: #fff; opacity: 0; animation: pop .6s .9s both; box-shadow: 0 0 28px rgba(255,61,133,.6); }
+.logo .tag { color: #d9d3ff; letter-spacing: .28em; text-transform: uppercase; font-size: 12px; font-weight: 600; opacity: 0; animation: pop .6s 1.25s forwards; }
+.shine { position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.55) 50%, transparent 60%); mix-blend-mode: overlay; transform: translateX(-120%); animation: sweep 1.2s 1.6s ease forwards; pointer-events: none; }
+@keyframes sweep { to { transform: translateX(120%); } }
+.rollball { position: absolute; bottom: 21%; left: -80px; width: 64px; height: 64px; z-index: 3; animation: roll 2.2s .2s cubic-bezier(.3,.6,.3,1) forwards; }
+@keyframes roll { 0% { left: -80px; transform: rotate(0); } 100% { left: calc(100% + 80px); transform: rotate(900deg); } }
+.loadbox { position: absolute; left: 12%; right: 12%; bottom: 11%; z-index: 4; text-align: center; }
+.bar { height: 10px; border-radius: 99px; background: rgba(255,255,255,.14); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--mint), var(--blue), var(--hot)); transition: width .25s linear; }
+.loadtxt { margin-top: 8px; font-size: 13px; color: #cfc9ff; letter-spacing: .06em; min-height: 18px; }
+.startbtn { position: absolute; left: 50%; bottom: 9%; transform: translateX(-50%); z-index: 5; font-size: 26px; padding: 14px 38px; animation: bounce 1.2s ease-in-out infinite; }
+@keyframes bounce { 50% { transform: translateX(-50%) translateY(-6px) scale(1.04); } }
+
+/* ---------- bosh sahifa ---------- */
+.hero { position: relative; overflow: hidden; border-radius: 22px; padding: 16px; background: linear-gradient(135deg, #3a1ca8, #7a2bd0 55%, #ff3d85); border: 1px solid rgba(255,255,255,.25); box-shadow: 0 14px 34px rgba(90,40,200,.45); }
+.hero::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, rgba(255,255,255,.06) 0 14px, transparent 14px 28px); pointer-events: none; }
+.hero > * { position: relative; z-index: 1; }
+.vs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; text-align: center; margin: 8px 0 14px; }
+.vs .t { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--disp); font-weight: 700; font-size: 17px; text-transform: uppercase; line-height: 1.05; min-width: 0; }
+.vs .t b { font-size: 30px; color: var(--gold); line-height: 1; }
+.vs .x { font-family: var(--disp); font-weight: 800; font-size: 28px; opacity: .8; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { position: relative; text-align: left; padding: 14px; border-radius: 18px; min-height: 96px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; border: 1px solid rgba(255,255,255,.2); transition: transform .12s; }
+.tile:active { transform: scale(.97); }
+.tile h3 { font-size: 24px; }
+.tile small { font-size: 13px; opacity: .9; font-weight: 500; }
+.tile.a { background: linear-gradient(135deg, #0e8f7a, #25f0b0 140%); color: #032a1f; }
+.tile.b { background: linear-gradient(135deg, #b8860b, #ffc93c 140%); color: #2d1d00; }
+.tile.c { background: linear-gradient(135deg, #1b50c8, #3ea8ff 140%); color: #031a3a; }
+.tile.d { background: linear-gradient(135deg, #b0124f, #ff3d85 140%); color: #3a0016; }
+.tile .big { position: absolute; right: -10px; bottom: -14px; font-family: var(--disp); font-weight: 800; font-size: 78px; opacity: .22; line-height: 1; }
+.stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.stats3 b { display: block; font-family: var(--disp); font-size: 30px; line-height: 1; }
+.stats3 span { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.sw { width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; }
+.sw[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 3px var(--mint); }
+.input { width: 100%; font: inherit; font-family: var(--disp); font-size: 20px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink); background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; user-select: text; -webkit-user-select: text; }
+
+/* ---------- kartalar ---------- */
+/* Barcha o'lchamlar --u (karta birligi) orqali: yozuvlar bir-biriga siljimaydi */
+.pcard { --u: 16px; --c1: #ffe27a; --c2: #d19a14; --ink2: #2e2000; font-size: var(--u); width: calc(var(--u) * 8.2); height: calc(var(--u) * 11.6); position: relative; border-radius: var(--u) calc(var(--u) * .7) var(--u) calc(var(--u) * .7); background: linear-gradient(155deg, var(--c1), var(--c2)); color: var(--ink2); box-shadow: 0 calc(var(--u) * .5) calc(var(--u) * 1.2) rgba(0,0,0,.45), inset 0 0 0 calc(var(--u) * .14) rgba(255,255,255,.35); overflow: hidden; flex: none; text-align: left; }
+.pcard::before { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 70% at 20% 0%, rgba(255,255,255,.55), transparent 60%), repeating-linear-gradient(115deg, rgba(255,255,255,.14) 0 calc(var(--u) * .5), transparent calc(var(--u) * .5) var(--u)); pointer-events: none; }
+.pcard .ovr { position: absolute; left: calc(var(--u) * .55); top: calc(var(--u) * .3); font-family: var(--disp); font-weight: 800; font-size: calc(var(--u) * 2.2); line-height: 1; }
+.pcard .pos { position: absolute; left: calc(var(--u) * .7); top: calc(var(--u) * 2.55); font-family: var(--disp); font-weight: 700; font-size: var(--u); line-height: 1; letter-spacing: .06em; }
+.pcard .nat { position: absolute; left: calc(var(--u) * .6); top: calc(var(--u) * 3.9); font-size: calc(var(--u) * .7); line-height: 1; font-weight: 700; padding: calc(var(--u) * .15) calc(var(--u) * .4); border-radius: calc(var(--u) * .4); background: rgba(0,0,0,.18); }
+.pcard .av { position: absolute; right: calc(var(--u) * .2); top: calc(var(--u) * .5); width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6); }
+.pcard .av svg { width: 100%; height: 100%; display: block; }
+.pcard .nm { position: absolute; left: 0; right: 0; top: calc(var(--u) * 6.5); text-align: center; font-family: var(--disp); font-weight: 800; font-size: calc(var(--u) * 1.15); line-height: 1.15; text-transform: uppercase; letter-spacing: .03em; padding: 0 calc(var(--u) * .3) calc(var(--u) * .2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: calc(var(--u) * .1) solid rgba(0,0,0,.22); }
+.pcard .st { position: absolute; left: calc(var(--u) * .35); right: calc(var(--u) * .35); top: calc(var(--u) * 8.55); display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(var(--u) * .1); text-align: center; font-family: var(--disp); font-weight: 700; line-height: 1.05; }
+.pcard .st b { display: block; font-size: calc(var(--u) * 1.05); }
+.pcard .st span { display: block; font-size: calc(var(--u) * .62); opacity: .75; letter-spacing: .04em; }
+.pcard.r-bronze { --c1: #e8ad7e; --c2: #8a5430; --ink2: #2b1608; }
+.pcard.r-silver { --c1: #f2f5fd; --c2: #8d98b3; --ink2: #1c2235; }
+.pcard.r-gold { --c1: #ffe27a; --c2: #d19a14; --ink2: #2e2000; }
+.pcard.r-elite { --c1: #e29bff; --c2: #3b17b0; --ink2: #ffffff; box-shadow: 0 0 calc(var(--u) * 1.4) rgba(180,76,255,.75), 0 calc(var(--u) * .5) calc(var(--u) * 1.2) rgba(0,0,0,.45), inset 0 0 0 calc(var(--u) * .14) rgba(120,240,255,.7); }
+.pcard.r-elite::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.5) 50%, transparent 62%); transform: translateX(-130%); animation: sweep 2.6s 0s ease-in-out infinite; pointer-events: none; }
+.pcard.mini { --u: 8.4px; }
+.pcard.mini .st, .pcard.mini .nat { display: none; }
+.pcard.mini .av { width: calc(var(--u) * 4.8); height: calc(var(--u) * 4.8); top: calc(var(--u) * .6); right: calc(var(--u) * -.2); }
+.pcard.mini .nm { top: calc(var(--u) * 6.7); }
+.pcard.big { --u: 22px; }
+.pcard.empty { background: rgba(255,255,255,.08); box-shadow: none; border: 2px dashed rgba(255,255,255,.3); color: var(--muted); display: grid; place-items: center; font-family: var(--disp); }
+.pcard.empty::before { display: none; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 12px 8px; justify-items: center; }
+.grid-cards .pcard { --u: 11.5px; }
+
+/* ---------- jamoa (maydon) ---------- */
+.rate { display: flex; align-items: center; gap: 14px; }
+.rate .n { font-family: var(--disp); font-weight: 800; font-size: 56px; line-height: .9; color: var(--gold); text-shadow: 0 0 18px rgba(255,201,60,.4); }
+.rate .bars { flex: 1; display: grid; gap: 6px; }
+.rate .b { display: grid; grid-template-columns: 38px 1fr 28px; gap: 8px; align-items: center; font-family: var(--disp); font-weight: 700; font-size: 14px; color: var(--muted); }
+.rate .b i { display: block; height: 7px; border-radius: 9px; background: rgba(255,255,255,.12); overflow: hidden; }
+.rate .b i s { display: block; height: 100%; border-radius: 9px; background: linear-gradient(90deg, var(--mint), var(--blue)); }
+.rate .b em { font-style: normal; color: var(--ink); text-align: right; }
+.pitch { position: relative; width: 100%; aspect-ratio: 5 / 6.7; border-radius: 18px; overflow: hidden; background: repeating-linear-gradient(0deg, #1c8a43 0 12.5%, #20a04e 12.5% 25%); border: 2px solid rgba(255,255,255,.55); box-shadow: 0 14px 30px rgba(0,0,0,.4); }
+.pitch .ln { position: absolute; border: 2px solid rgba(255,255,255,.55); pointer-events: none; }
+.pitch .mid { left: 0; right: 0; top: 50%; height: 0; border-width: 2px 0 0; }
+.pitch .cc { left: 50%; top: 50%; width: 26%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); }
+.pitch .bx1 { left: 22%; right: 22%; top: 0; height: 15%; border-top: 0; }
+.pitch .bx2 { left: 22%; right: 22%; bottom: 0; height: 15%; border-bottom: 0; }
+.slot { position: absolute; transform: translate(-50%, -50%); }
+.slot .pcard { transition: transform .12s; }
+.slot:active .pcard { transform: scale(.94); }
+.slot .lab { position: absolute; left: 50%; bottom: -1.2em; transform: translateX(-50%); font-family: var(--disp); font-weight: 700; font-size: 10px; letter-spacing: .08em; color: #fff; text-shadow: 0 1px 3px #000; }
+.slot.fresh .pcard { animation: drop .5s cubic-bezier(.2,1.4,.3,1); }
+@keyframes drop { from { transform: translateY(-30px) scale(1.3); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ---------- oyna (modal / sheet) ---------- */
+.overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: rgba(5,3,20,.72); backdrop-filter: blur(5px); animation: fade .2s ease both; padding: 0; }
+.overlay.center { align-items: center; padding: 16px; }
+@keyframes fade { from { opacity: 0; } }
+.sheet { width: min(480px, 100%); max-height: 86%; overflow-y: auto; background: linear-gradient(180deg, #281a68, #130a38); border: 1px solid var(--line); border-radius: 24px 24px 0 0; padding: 16px 16px 24px; animation: up .28s cubic-bezier(.2,.9,.2,1) both; }
+@keyframes up { from { transform: translateY(60px); opacity: 0; } }
+.sheet.mid { border-radius: 24px; max-width: 420px; }
+.sheet h3 { font-size: 26px; margin-bottom: 10px; }
+.row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); text-align: left; width: 100%; margin-bottom: 8px; }
+.row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; font-family: var(--disp); text-transform: uppercase; font-weight: 700; font-size: 17px; letter-spacing: .03em; line-height: 1.1; }
+.row .info small { font-family: var(--body); text-transform: none; font-weight: 500; font-size: 12px; color: var(--muted); letter-spacing: 0; }
+.row.on { border-color: var(--mint); box-shadow: 0 0 0 1px var(--mint) inset; }
+.tag { font-family: var(--disp); font-weight: 700; font-size: 13px; letter-spacing: .06em; padding: 2px 8px; border-radius: 8px; background: var(--panel2); color: var(--muted); text-transform: uppercase; }
+.tag.good { background: rgba(37,240,176,.2); color: var(--mint); }
+.detail { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.sbar { width: 100%; display: grid; gap: 7px; }
+.sbar .b { display: grid; grid-template-columns: 54px 1fr 32px; gap: 8px; align-items: center; font-family: var(--disp); font-weight: 700; letter-spacing: .05em; color: var(--muted); font-size: 15px; }
+.sbar .b i { display: block; height: 9px; border-radius: 9px; background: rgba(255,255,255,.12); overflow: hidden; }
+.sbar .b s { display: block; height: 100%; border-radius: 9px; background: linear-gradient(90deg, var(--mint), var(--gold)); }
+.sbar .b em { font-style: normal; color: var(--ink); text-align: right; }
+
+/* ---------- paketlar ---------- */
+.packs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.packcard { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 8px 14px; border-radius: 20px; background: var(--panel); border: 1px solid var(--line); text-align: center; }
+.packcard small { color: var(--muted); font-size: 12px; min-height: 30px; }
+.packart { --p1: #e8ad7e; --p2: #8a5430; position: relative; width: 104px; height: 140px; border-radius: 14px 14px 10px 10px; background: linear-gradient(160deg, var(--p1), var(--p2)); box-shadow: 0 12px 24px rgba(0,0,0,.45), inset 0 0 0 3px rgba(255,255,255,.35); overflow: hidden; display: grid; place-items: center; animation: floaty 3.4s ease-in-out infinite; }
+.packart::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, rgba(255,255,255,.18) 0 10px, transparent 10px 20px); }
+.packart::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.6) 50%, transparent 60%); transform: translateX(-130%); animation: sweep 3s ease-in-out infinite; }
+.packart b { position: relative; z-index: 1; font-family: var(--disp); font-weight: 800; font-size: 24px; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); line-height: .9; text-align: center; }
+.packart b span { display: block; font-size: 12px; letter-spacing: .16em; }
+@keyframes floaty { 50% { transform: translateY(-6px) rotate(-1.5deg); } }
+.packart.silver { --p1: #f2f5fd; --p2: #7a88ad; }
+.packart.gold { --p1: #ffe27a; --p2: #c58500; }
+.packart.gem { --p1: #8cf0ff; --p2: #5b35e8; }
+.reveal { position: fixed; inset: 0; z-index: 60; background: radial-gradient(80% 60% at 50% 40%, #3a1a98, #0a0624 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 16px; animation: fade .25s both; overflow: hidden; }
+.reveal .hint { font-family: var(--disp); font-weight: 700; font-size: 22px; letter-spacing: .12em; text-transform: uppercase; color: #dcd6ff; text-align: center; min-height: 28px; }
+.cardwrap { perspective: 900px; }
+.flip { --u: 24px; position: relative; width: calc(var(--u) * 8.2); height: calc(var(--u) * 11.6); font-size: var(--u); transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3,1.2,.4,1); }
+.flip.done { transform: rotateY(180deg); }
+.flip > * { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip .front { transform: rotateY(180deg); }
+.flip .front .pcard { --u: 24px; }
+.flip .back { border-radius: 24px 17px 24px 17px; background: linear-gradient(155deg, #4a2bd0, #1a0b5e); box-shadow: 0 0 38px rgba(138,92,255,.7), inset 0 0 0 3px rgba(255,255,255,.35); display: grid; place-items: center; font-family: var(--disp); font-weight: 800; font-size: 38px; color: var(--gold); letter-spacing: .05em; }
+.flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.flash.go { animation: flash .7s ease-out; }
+@keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
+.shake { animation: shake .5s linear; }
+@keyframes shake { 20% { transform: translate(-6px, 2px) rotate(-3deg); } 40% { transform: translate(6px, -2px) rotate(3deg); } 60% { transform: translate(-5px, 1px) rotate(-2deg); } 80% { transform: translate(5px, -1px) rotate(2deg); } }
+.minirow { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+/* ---------- liga ---------- */
+.table { width: 100%; border-collapse: collapse; font-family: var(--disp); font-weight: 700; font-size: 16px; letter-spacing: .01em; }
+.table th { color: var(--muted); font-size: 13px; text-transform: uppercase; font-weight: 600; text-align: center; padding: 4px 3px; }
+.table td { text-align: center; padding: 8px 3px; border-top: 1px solid var(--line); }
+.table { table-layout: fixed; }
+.table td, .table th { white-space: nowrap; }
+.table td:nth-child(2) { text-align: left; text-transform: uppercase; overflow: hidden; }
+.tn { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.table tr.me td { background: rgba(37,240,176,.14); }
+.table tr.me td:first-child { box-shadow: inset 3px 0 0 var(--mint); }
+.table td.pts { color: var(--gold); font-size: 20px; }
+.table th:nth-child(1), .table td:nth-child(1) { width: 26px; }
+.table th:nth-child(3), .table td:nth-child(3) { width: 26px; }
+.table th:nth-child(4), .table td:nth-child(4) { width: 58px; }
+.table th:nth-child(5), .table td:nth-child(5) { width: 34px; }
+.table th:nth-child(6), .table td:nth-child(6) { width: 38px; }
+.jersey { width: 14px; height: 14px; border-radius: 4px; flex: none; }
+.fx { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 4px; border-top: 1px solid var(--line); font-family: var(--disp); font-weight: 700; font-size: 17px; text-transform: uppercase; }
+.fx:first-child { border-top: 0; }
+.fx .sc { font-size: 22px; color: var(--gold); min-width: 54px; text-align: center; }
+.fx .tm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx .tm.r { text-align: right; }
+.res-w { color: var(--mint); } .res-l { color: var(--hot); } .res-d { color: var(--muted); }
+
+/* ---------- kunlik sovga ---------- */
+.days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.day { aspect-ratio: 1; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; font-family: var(--disp); font-weight: 700; position: relative; }
+.day small { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.day b { font-size: 24px; color: var(--gold); line-height: 1; }
+.day.gem b { color: var(--blue); }
+.day.got { opacity: .45; }
+.day.got::after { content: "✓"; position: absolute; top: 4px; right: 8px; color: var(--mint); font-size: 18px; }
+.day.now { border-color: var(--mint); box-shadow: 0 0 0 2px var(--mint), 0 0 26px rgba(37,240,176,.4); animation: pulse 1.4s ease-in-out infinite; }
+.day.big { grid-column: span 2; aspect-ratio: auto; }
+@keyframes pulse { 50% { transform: scale(1.05); } }
+
+/* ---------- o'yin maydoni (match) ---------- */
+#s-play { position: fixed; inset: 0; z-index: 40; background: linear-gradient(180deg, #0a0820, #140a38); display: flex; flex-direction: column; align-items: center; padding: 8px max(10px, env(safe-area-inset-left, 0px)) max(8px, env(safe-area-inset-bottom, 0px)); }
+#s-play.off { display: none; }
+.hud { width: min(480px, 100%); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 4px 4px 8px; }
+.hud .tm { display: flex; align-items: center; gap: 6px; font-family: var(--disp); font-weight: 700; font-size: 15px; text-transform: uppercase; min-width: 0; }
+.hud .tm.r { justify-content: flex-end; }
+.hud .tm span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud .mid { text-align: center; line-height: 1; }
+.hud .score { font-family: var(--disp); font-weight: 800; font-size: 40px; letter-spacing: .06em; padding: 0 12px; background: rgba(0,0,0,.4); border-radius: 12px; border: 1px solid var(--line); }
+.hud .clock { font-family: var(--disp); font-weight: 700; color: var(--gold); font-size: 16px; margin-top: 3px; letter-spacing: .08em; }
+.playbox { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+#pitchCv { height: 100%; max-height: 100%; max-width: 100%; aspect-ratio: 360 / 620; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.5); touch-action: none; }
+.banner { position: absolute; left: 0; right: 0; top: 36%; text-align: center; pointer-events: none; font-family: var(--disp); font-weight: 800; font-size: clamp(40px, 12.5vw, 68px); letter-spacing: .05em; padding: 0 8px; color: var(--gold); text-shadow: 0 4px 0 #7a4a00, 0 0 30px rgba(255,201,60,.8); opacity: 0; transform: scale(.4); }
+.banner small { display: block; font-size: 20px; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.6); letter-spacing: .1em; }
+.banner.show { animation: bannerIn 1.9s cubic-bezier(.2,1.3,.3,1) both; }
+@keyframes bannerIn { 0% { opacity: 0; transform: scale(.4) rotate(-6deg); } 18% { opacity: 1; transform: scale(1.08) rotate(0); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.2); } }
+.ctrl { width: min(480px, 100%); display: flex; align-items: center; justify-content: space-between; padding: 8px 6px 2px; gap: 10px; }
+.joy { position: relative; width: 124px; height: 124px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.1), rgba(255,255,255,.04)); border: 2px solid rgba(255,255,255,.22); touch-action: none; flex: none; }
+.joy i { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #7dffd9, var(--mint)); box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+.actions { display: flex; align-items: center; gap: 12px; }
+.abtn { width: 84px; height: 84px; border-radius: 50%; font-family: var(--disp); font-weight: 800; font-size: 17px; padding: 0; letter-spacing: .05em; text-transform: uppercase; touch-action: none; color: #fff; box-shadow: inset 0 -6px 0 rgba(0,0,0,.25), 0 8px 18px rgba(0,0,0,.4); }
+.abtn.a { background: linear-gradient(180deg, #ff7bb0, var(--hot)); }
+.abtn.b { background: linear-gradient(180deg, #6fc3ff, var(--blue)); width: 70px; height: 70px; margin-bottom: 40px; font-size: 14px; }
+.abtn:active, .abtn.down { transform: scale(.92); filter: brightness(1.15); }
+.quit { position: absolute; left: 6px; bottom: 6px; z-index: 3; opacity: .85; font-size: 14px !important; padding: 5px 10px !important; }
+.kbhint { color: var(--muted); font-size: 11px; text-align: center; padding-top: 2px; }
+@media (hover: none) { .kbhint { display: none; } }
+.resbox { text-align: center; display: flex; flex-direction: column; gap: 12px; }
+.resbox .big { font-family: var(--disp); font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: .06em; }
+.resbox .verdict { font-family: var(--disp); font-weight: 800; font-size: 34px; text-transform: uppercase; letter-spacing: .08em; }
+.resgrid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px 12px; font-family: var(--disp); font-weight: 700; font-size: 18px; align-items: center; }
+.resgrid .l { color: var(--muted); text-transform: uppercase; font-size: 13px; letter-spacing: .08em; }
+.reward { display: flex; justify-content: center; gap: 10px; }
+
+/* ---------- penalti ---------- */
+#penCv { width: 100%; border-radius: 18px; touch-action: none; display: block; box-shadow: 0 12px 28px rgba(0,0,0,.45); }
+.pips { display: flex; justify-content: center; gap: 10px; }
+.pip { width: 26px; height: 26px; border-radius: 50%; border: 3px solid rgba(255,255,255,.35); display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+.pip.g { background: var(--mint); border-color: var(--mint); color: #05281c; }
+.pip.m { background: var(--hot); border-color: var(--hot); color: #fff; }
+.meter { position: relative; height: 22px; border-radius: 99px; background: linear-gradient(90deg, #ff3d85, #ffc93c 30%, #25f0b0 45% 55%, #ffc93c 70%, #ff3d85); border: 2px solid rgba(255,255,255,.5); overflow: hidden; }
+.meter i { position: absolute; top: -2px; bottom: -2px; width: 8px; margin-left: -4px; background: #fff; border-radius: 4px; box-shadow: 0 0 10px #fff; }
+
+@media (max-height: 640px) {
+  .pcard.big { font-size: 18px; }
+  .joy { width: 104px; height: 104px; }
+  .abtn { width: 72px; height: 72px; }
+}
+@media (prefers-reduced-motion: reduce) { .beams, .packart, .packart::after, .pcard.r-elite::after, .day.now, .startbtn { animation: none !important; } }
+</style>
+</head>
+<body>
+
+
+<div id="app">
+  <header class="top" id="top" hidden>
+    <div class="crest" id="crest"></div>
+    <div class="who"><b id="clubName"></b><span id="lvlText"></span></div>
+    <div class="chips">
+      <span class="chip coin"><i></i><span id="coinTxt">0</span></span>
+      <span class="chip gem"><i></i><span id="gemTxt">0</span></span>
+      <button class="ibtn" id="sndBtn" aria-label="Ovozni yoqish yoki o‘chirish">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path id="sndWave" d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <!-- KIRISH -->
+    <section class="screen" id="s-splash" aria-label="Turon FC">
+      <div class="beams"></div>
+      <div class="confetti-bg" id="confBg"></div>
+      <div class="logo">
+        <div class="word" id="logoWord" aria-label="Turon"></div>
+        <div class="fc">FC</div>
+        <div class="tag">Futbol jamoangni yig‘</div>
+        <div class="shine"></div>
+      </div>
+      <svg class="rollball" viewBox="0 0 64 64" aria-hidden="true">
+        <defs><radialGradient id="bg1" cx="35%" cy="30%"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#c9c6e8"/></radialGradient></defs>
+        <circle cx="32" cy="32" r="30" fill="url(#bg1)" stroke="#2b2160" stroke-width="2"/>
+        <polygon points="32,20 43,28 39,41 25,41 21,28" fill="#2b2160"/>
+        <g stroke="#2b2160" stroke-width="2.2" fill="none"><path d="M32 20V4M43 28l15-5M39 41l9 13M25 41l-9 13M21 28L6 23"/></g>
+      </svg>
+      <div class="loadbox" id="loadBox">
+        <div class="bar"><i id="loadFill"></i></div>
+        <div class="loadtxt" id="loadTxt">Maydon tayyorlanmoqda…</div>
+      </div>
+      <button class="btn gold startbtn" id="startBtn" hidden>Boshlash</button>
+    </section>
+
+    <!-- BOSH SAHIFA -->
+    <section class="screen off" id="s-home"><div class="stack" id="homeBox"></div></section>
+
+    <!-- JAMOA -->
+    <section class="screen off" id="s-squad"><div class="stack" id="squadBox"></div></section>
+
+    <!-- O‘YIN (lobbi) -->
+    <section class="screen off" id="s-match"><div class="stack" id="matchBox"></div></section>
+
+    <!-- PAKETLAR -->
+    <section class="screen off" id="s-packs"><div class="stack" id="packsBox"></div></section>
+
+    <!-- LIGA -->
+    <section class="screen off" id="s-league"><div class="stack" id="leagueBox"></div></section>
+
+    <!-- PENALTI -->
+    <section class="screen off" id="s-pen"><div class="stack" id="penBox"></div></section>
+
+    <!-- KUNLIK SOVG‘A -->
+    <section class="screen off" id="s-daily"><div class="stack" id="dailyBox"></div></section>
+  </main>
+
+  <nav class="nav" id="nav" hidden aria-label="Asosiy menyu">
+    <button data-go="home" aria-label="Bosh sahifa"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>Bosh</button>
+    <button data-go="squad" aria-label="Jamoa"><svg viewBox="0 0 24 24"><path d="M8 3l-5 3 2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 01-8 0z"/></svg>Jamoa</button>
+    <button class="play" data-go="match" aria-label="O‘yin"><span class="pb"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5l12 7-12 7z"/></svg></span><em>O‘yin</em></button>
+    <button data-go="packs" aria-label="Paketlar"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 13h18M12 8c-3 0-5-1.5-5-3.2S9 2 12 8c3-6 5-3.2 5-.8S15 8 12 8z"/></svg>Paketlar</button>
+    <button data-go="league" aria-label="Liga"><svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 01-10 0zM7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M12 14v4M8 21h8M9 18h6"/></svg>Liga</button>
+  </nav>
+
+  <!-- O‘ynaladigan o‘yin (butun ekran) -->
+  <section id="s-play" class="off" aria-label="Futbol o‘yini">
+    <div class="hud">
+      <div class="tm"><i class="jersey" id="hudJ0"></i><span id="hudN0"></span></div>
+      <div class="mid"><div class="score" id="hudScore">0 : 0</div><div class="clock" id="hudClock">0'</div></div>
+      <div class="tm r"><span id="hudN1"></span><i class="jersey" id="hudJ1"></i></div>
+    </div>
+    <div class="playbox">
+      <canvas id="pitchCv" width="360" height="620"></canvas>
+      <div class="banner" id="banner"></div>
+      <button class="btn ghost small quit" id="quitBtn">Chiqish</button>
+    </div>
+    <div class="ctrl">
+      <div class="joy" id="joy" aria-label="Harakat joystigi"><i id="joyKnob"></i></div>
+      <div class="actions">
+        <button class="abtn b" id="btnB">Uzatma</button>
+        <button class="abtn a" id="btnA">Zarba</button>
+      </div>
+    </div>
+    <div class="kbhint">Klaviatura: strelka yoki WASD · Bo‘sh joy zarba · Shift uzatma · Q almashtirish</div>
+  </section>
+
+  <div id="modalRoot"></div>
+</div>
+
+<script>
+(function () {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const ri = (a, b) => Math.floor(rnd(a, b + 1));
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const fmt = (n) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const TS = /[?&]fast/.test(location.search) ? 6 : 1; // sinov uchun tezlashtirish
+const KEY = 'turon-fc-v1';
+
+/* ===================== MA'LUMOTLAR ===================== */
+const FIRST = ['Aziz','Bobur','Sardor','Jasur','Otabek','Timur','Rustam','Doston','Shoxrux','Sanjar','Laziz','Akmal','Eldor','Farhod','Nodir','Davron','Kamol','Murod','Ilyos','Marcus','Luca','Mateo','Kenji','Andre','Viktor','Rafael','Emil','Hugo','Dario','Idris','Tomas','Yan'];
+const LAST = ['Qodirov','Rahimov','Nazarov','Yusupov','Ergashev','Mirzayev','Saidov','Tursunov','Karimov','Hamidov','Boboev','Ismoilov','Zokirov','Olimov','Ravshanov','Sobirov','Silva','Moretti','Varga','Kovac','Okafor','Lindqvist','Duarte','Mendes','Santoro','Petrov','Hartmann','Navarro'];
+const NATS = ['UZB','UZB','UZB','UZB','BRA','ARG','FRA','ESP','GER','ITA','POR','NED','JPN','NGA','CRO','TUR'];
+const POSBY = { GK: ['GK'], DEF: ['CB','CB','LB','RB'], MID: ['CM','CM','CDM','CAM','LM','RM'], FWD: ['ST','ST','LW','RW','CF'] };
+const grp = (pos) => pos === 'GK' ? 'GK' : ['CB','LB','RB'].includes(pos) ? 'DEF' : ['CM','CDM','CAM','LM','RM'].includes(pos) ? 'MID' : 'FWD';
+const OFF = { GK: [2, 0, -6, 3, -8], DEF: [-3, -26, -8, 8, 6], MID: [0, -4, 6, -12, -3], FWD: [3, 6, -4, -32, -6] };
+const RARN = { bronze: 'Bronza', silver: 'Kumush', gold: 'Oltin', elite: 'Yulduz' };
+const rarity = (o) => o < 65 ? 'bronze' : o < 75 ? 'silver' : o < 85 ? 'gold' : 'elite';
+const SLOTS = [
+  { k: 'GK',  g: 'GK',  x: 50, y: 89 }, { k: 'LB',  g: 'DEF', x: 14, y: 65 }, { k: 'CB',  g: 'DEF', x: 38, y: 68 }, { k: 'CB',  g: 'DEF', x: 62, y: 68 }, { k: 'RB',  g: 'DEF', x: 86, y: 65 },
+  { k: 'LM',  g: 'MID', x: 14, y: 42 }, { k: 'CM',  g: 'MID', x: 38, y: 45 }, { k: 'CM',  g: 'MID', x: 62, y: 45 }, { k: 'RM',  g: 'MID', x: 86, y: 42 },
+  { k: 'ST',  g: 'FWD', x: 35, y: 15 }, { k: 'ST',  g: 'FWD', x: 65, y: 15 },
+];
+const CLUBS = [
+  { n: 'Zarafshon FC', c: '#ff7a2f', r: 79 }, { n: 'Chirchiq Bo‘ronlari', c: '#3ea8ff', r: 76 }, { n: 'Buxoro Sherlari', c: '#ffc93c', r: 73 },
+  { n: 'Farg‘ona Lochinlari', c: '#25f0b0', r: 70 }, { n: 'Xiva Qal‘a', c: '#b44cff', r: 68 }, { n: 'Nurota Tulporlari', c: '#ff3d85', r: 65 }, { n: 'Orol Burgutlari', c: '#e6e6f5', r: 62 },
+];
+const COLS = ['#25f0b0', '#ff3d85', '#ffc93c', '#3ea8ff', '#ff7a2f', '#b44cff'];
+const PACKS = [
+  { id: 'bronze', name: 'Bronza', cost: 500,  cur: 'coins', n: 3, min: 55, max: 72, guar: 0,  note: '3 ta futbolchi', cls: '' },
+  { id: 'silver', name: 'Kumush', cost: 1500, cur: 'coins', n: 4, min: 62, max: 80, guar: 72, note: '4 ta, kamida 72 reyting', cls: 'silver' },
+  { id: 'gold',   name: 'Oltin',  cost: 4000, cur: 'coins', n: 5, min: 70, max: 90, guar: 80, note: '5 ta, kamida 80 reyting', cls: 'gold' },
+  { id: 'gem',    name: 'Olmos',  cost: 50,   cur: 'gems',  n: 5, min: 80, max: 95, guar: 86, note: '5 ta, kamida 86 reyting', cls: 'gem' },
+];
+const DAILY = [{ c: 500 }, { c: 800 }, { c: 1200 }, { g: 10 }, { c: 1800 }, { c: 2500 }, { c: 5000, g: 25 }];
+
+/* ===================== FUTBOLCHI ===================== */
+function mkPlayer(pos, ovr) {
+  const o = OFF[grp(pos)];
+  const st = o.map((d) => clamp(Math.round(ovr + d + ri(-4, 4)), 25, 99));
+  const first = pick(FIRST), last = pick(LAST);
+  return { id: uid(), name: first + ' ' + last, short: first[0] + '. ' + last, pos, ovr, st, rar: rarity(ovr), nat: pick(NATS) };
+}
+const rollOvr = (min, max) => Math.round(min + (max - min) * Math.pow(Math.random(), 1.7));
+function rollPos() { const r = Math.random(); return r < .08 ? 'GK' : pick(POSBY[r < .38 ? 'DEF' : r < .70 ? 'MID' : 'FWD']); }
+function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+function avatar(p) {
+  const h = hash(p.id), skin = ['#f1c9a5', '#d9a06b', '#a86b3c', '#7a4a2a', '#f6d7bd'][h % 5], hair = ['#1c1209', '#4a2a12', '#c9a063', '#8a3b12', '#222'][(h >> 3) % 5];
+  const short = (h >> 6) % 3 === 0;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="98" rx="40" ry="28" fill="rgba(0,0,0,.35)"/><path d="M12 100c0-20 16-28 38-28s38 8 38 28z" fill="rgba(255,255,255,.55)" stroke="rgba(0,0,0,.25)" stroke-width="2"/><rect x="42" y="58" width="16" height="16" rx="6" fill="${skin}"/><ellipse cx="50" cy="42" rx="19" ry="22" fill="${skin}"/><path d="M30 40c0-18 8-24 20-24s20 6 20 24c-4-8-10-12-20-12s-16 4-20 12z" fill="${hair}"/>${short ? '' : `<path d="M30 38c-3 10-1 18 3 22-1-8 0-14 3-20z" fill="${hair}"/>`}<circle cx="43" cy="44" r="2" fill="#222"/><circle cx="57" cy="44" r="2" fill="#222"/><path d="M44 53q6 4 12 0" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+}
+function cardHTML(p, cls = '') {
+  if (!p) return `<div class="pcard empty ${cls}">Bo‘sh</div>`;
+  const labs = p.pos === 'GK' ? ['DIV', 'HAN', 'KIC', 'REF', 'SPD'] : ['PAC', 'SHO', 'PAS', 'DEF', 'PHY'];
+  return `<div class="pcard r-${p.rar} ${cls}"><div class="ovr">${p.ovr}</div><div class="pos">${p.pos}</div><div class="nat">${p.nat}</div><div class="av">${avatar(p)}</div><div class="nm">${esc(p.short)}</div><div class="st">${p.st.map((v, i) => `<div><b>${v}</b><span>${labs[i]}</span></div>`).join('')}</div></div>`;
+}
+function crest(c, w = 42) {
+  return `<svg viewBox="0 0 42 46" width="${w}" height="${Math.round(w * 46 / 42)}" aria-hidden="true"><path d="M21 2l17 5v14c0 11-8 19-17 23C12 40 4 32 4 21V7z" fill="${c}" stroke="#fff" stroke-width="2"/><path d="M21 2l17 5v14c0 11-8 19-17 23z" fill="rgba(0,0,0,.22)"/><circle cx="21" cy="21" r="8" fill="#fff"/><polygon points="21,15 26,19 24,25 18,25 16,19" fill="#1d1050"/></svg>`;
+}
+const sellPrice = (p) => p.ovr < 65 ? 100 : p.ovr < 75 ? 300 : p.ovr < 85 ? 900 : 3000;
+
+/* ===================== HOLAT ===================== */
+let G;
+function newGame() {
+  const players = [];
+  [['GK', 58], ['GK', 52], ['CB', 61], ['CB', 57], ['CB', 54], ['LB', 59], ['RB', 56], ['CM', 62], ['CM', 58], ['CDM', 55], ['LM', 60], ['RM', 57],
+   ['ST', 64], ['ST', 59], ['LW', 57], ['RW', 55]].forEach(([pos, o]) => players.push(mkPlayer(pos, o + ri(-2, 3))));
+  const g = { club: 'Registon FC', col: 0, coins: 3000, gems: 20, xp: 0, players, lineup: [], sound: true, stats: { played: 0, won: 0, goals: 0 },
+    daily: { last: '', streak: 0 }, league: null };
+  g.lineup = autoLineup(players);
+  g.league = freshLeague(1);
+  return g;
+}
+function autoLineup(players) {
+  const used = new Set();
+  return SLOTS.map((s) => {
+    const c = players.filter((p) => grp(p.pos) === s.g && !used.has(p.id)).sort((a, b) => b.ovr - a.ovr)[0];
+    if (c) used.add(c.id);
+    return c ? c.id : null;
+  });
+}
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) { const g = JSON.parse(raw); if (g && g.players && g.lineup && g.league) return g; } } catch (e) {}
+  return null;
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(G)); } catch (e) {} }
+G = load() || newGame();
+const byId = (id) => G.players.find((p) => p.id === id);
+const lineupPlayers = () => G.lineup.map(byId);
+function teamRating() { const l = lineupPlayers().filter(Boolean); return l.length ? Math.round(l.reduce((a, p) => a + p.ovr, 0) / 11) : 0; }
+const level = () => 1 + Math.floor(G.xp / 500);
+
+/* ===================== OVOZ ===================== */
+let AC = null;
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function tone(f, d = .1, type = 'sine', vol = .13, delay = 0, slide = 0) {
+  if (!G.sound) return; const a = ac(); if (!a) return;
+  const t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + d + .03);
+}
+const SFX = {
+  click: () => tone(660, .06, 'triangle', .1), kick: () => tone(190, .12, 'square', .1, 0, -110), tackle: () => tone(120, .1, 'square', .09),
+  whistle: () => { tone(2200, .18, 'sine', .1); tone(2400, .3, 'sine', .1, .2); },
+  goal: () => [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, .28, 'triangle', .13, i * .09)),
+  coin: () => { tone(988, .08, 'square', .07); tone(1318, .18, 'square', .07, .08); },
+  reveal: () => tone(300, .35, 'sawtooth', .07, 0, 600), flip: () => tone(520, .1, 'triangle', .1, 0, 240),
+  elite: () => [392, 523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, .32, 'triangle', .13, i * .08)),
+  save: () => tone(240, .18, 'sawtooth', .09, 0, -120), lose: () => [392, 349, 311].forEach((f, i) => tone(f, .3, 'sawtooth', .07, i * .15)),
+  win: () => [523, 659, 784, 1046].forEach((f, i) => tone(f, .22, 'triangle', .13, i * .12)),
+};
+const sfx = (n) => { try { if (SFX[n]) SFX[n](); } catch (e) {} };
+
+/* ===================== OYNA (sheet) ===================== */
+function openSheet(html, opt = {}) {
+  const r = $('#modalRoot');
+  r.innerHTML = `<div class="overlay ${opt.center ? 'center' : ''}" id="ov"><div class="sheet ${opt.center ? 'mid' : ''}">${html}</div></div>`;
+  $('#ov').addEventListener('click', (e) => { if (e.target.id === 'ov' && !opt.lock) closeSheet(); });
+  return $('#ov .sheet');
+}
+function closeSheet() { $('#modalRoot').innerHTML = ''; }
+
+/* ===================== NAVIGATSIYA ===================== */
+let cur = 'splash';
+const RENDER = {};
+function refreshTop() {
+  $('#crest').innerHTML = crest(COLS[G.col]);
+  $('#clubName').textContent = G.club;
+  $('#lvlText').textContent = 'Daraja ' + level() + ' · Reyting ' + teamRating();
+  $('#coinTxt').textContent = fmt(G.coins); $('#gemTxt').textContent = fmt(G.gems);
+  $('#sndWave').style.display = G.sound ? '' : 'none';
+}
+function go(name) {
+  closeSheet();
+  $$('.screen').forEach((s) => s.classList.add('off'));
+  const el = $('#s-' + name);
+  el.classList.remove('off', 'enter'); void el.offsetWidth; el.classList.add('enter'); el.scrollTop = 0;
+  cur = name;
+  const inApp = name !== 'splash';
+  $('#top').hidden = !inApp; $('#nav').hidden = !inApp;
+  $$('#nav button').forEach((b) => { if (b.dataset.go === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  refreshTop();
+  if (RENDER[name]) RENDER[name]();
+}
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const yesterday = () => { const d = new Date(Date.now() - 864e5); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const canClaim = () => G.daily.last !== today();
+function gain(coins, gems) { G.coins += coins || 0; G.gems += gems || 0; save(); refreshTop(); }
+
+/* ===================== KIRISH ===================== */
+function initSplash() {
+  const w = $('#logoWord');
+  w.innerHTML = [...'TURON'].map((ch, i) => `<span style="animation-delay:${(0.45 + i * 0.12).toFixed(2)}s">${ch}</span>`).join('');
+  const cols = ['#ffc93c', '#25f0b0', '#ff3d85', '#3ea8ff', '#b44cff'];
+  $('#confBg').innerHTML = Array.from({ length: 28 }, () => `<i style="left:${rnd(0, 100).toFixed(1)}%;background:${pick(cols)};animation-duration:${rnd(4, 9).toFixed(1)}s;animation-delay:${rnd(-8, 0).toFixed(1)}s"></i>`).join('');
+  const tips = ['Maydon tayyorlanmoqda…', 'To‘p shishirilmoqda…', 'Tribunalar to‘lmoqda…', 'Hakamlar chaqirilmoqda…', 'Jamoa saf tortmoqda…'];
+  let p = 0, i = 0;
+  const iv = setInterval(() => {
+    p = Math.min(100, p + rnd(7, 16)); $('#loadFill').style.width = p + '%';
+    $('#loadTxt').textContent = tips[Math.min(tips.length - 1, Math.floor(p / 21))]; i++;
+    if (p >= 100) { clearInterval(iv); setTimeout(() => { $('#loadBox').hidden = true; $('#startBtn').hidden = false; }, 250); }
+  }, 260);
+  $('#startBtn').addEventListener('click', () => { ac(); sfx('whistle'); go('home'); });
+}
+
+/* ===================== BOSH SAHIFA ===================== */
+RENDER.home = function () {
+  const opp = nextOpp(), rate = teamRating(), best = lineupPlayers().filter(Boolean).sort((a, b) => b.ovr - a.ovr)[0];
+  const rank = leagueTable().findIndex((t) => t.i === 0) + 1;
+  $('#homeBox').innerHTML = `
+    <div class="hero">
+      <div class="h-row"><h2>Keyingi o‘yin</h2><small>Liga · ${G.league.round + 1}-tur</small></div>
+      <div class="vs">
+        <div class="t">${crest(COLS[G.col], 46)}<span>${esc(G.club)}</span><b>${rate}</b></div>
+        <div class="x">VS</div>
+        <div class="t">${crest(opp.c, 46)}<span>${esc(opp.n)}</span><b>${opp.r}</b></div>
+      </div>
+      <button class="btn gold wide" data-act="play">O‘ynash</button>
+    </div>
+    <div class="tiles">
+      <button class="tile a" data-go="squad"><h3>Jamoa</h3><small>Tarkibni sozla</small><span class="big">${rate}</span></button>
+      <button class="tile b" data-go="packs"><h3>Paketlar</h3><small>Yangi yulduzlar</small><span class="big">★</span></button>
+      <button class="tile c" data-go="pen"><h3>Penalti</h3><small>Gol ur, tanga yut</small><span class="big">11</span></button>
+      <button class="tile d" data-go="daily">${canClaim() ? '<span class="dot" style="right:14px;top:12px"></span>' : ''}<h3>Sovg‘a</h3><small>Har kuni kir</small><span class="big">+</span></button>
+    </div>
+    <div class="card stats3">
+      <div><b>${G.stats.played}</b><span>O‘yin</span></div><div><b>${G.stats.won}</b><span>G‘alaba</span></div><div><b>${G.stats.goals}</b><span>Gol</span></div>
+    </div>
+    <div class="card" style="display:flex;gap:14px;align-items:center">
+      ${best ? cardHTML(best, '') : ''}
+      <div><h3 style="font-size:24px">Eng kuchli futbolchi</h3><p style="margin:6px 0 10px;color:var(--muted)">${best ? esc(best.name) + ' · ' + RARN[best.rar] : ''}<br>Liga o‘rni: <b style="color:var(--gold)">${rank}</b></p><button class="btn ghost small" data-go="league">Jadval</button></div>
+    </div>
+    <div class="card stack" style="gap:10px">
+      <h3 style="font-size:22px">Klub</h3>
+      <input class="input" id="clubInput" maxlength="18" value="${esc(G.club)}" aria-label="Klub nomi">
+      <div class="swatches" role="group" aria-label="Klub rangi">${COLS.map((c, i) => `<button class="sw" style="background:${c}" data-col="${i}" aria-label="Rang ${i + 1}" aria-pressed="${G.col === i}"></button>`).join('')}</div>
+    </div>`;
+  const inp = $('#clubInput');
+  inp.addEventListener('input', () => { G.club = inp.value.trim() || 'Registon FC'; save(); $('#clubName').textContent = G.club; });
+};
+
+/* ===================== JAMOA ===================== */
+let freshSlot = -1;
+RENDER.squad = function () {
+  const lp = lineupPlayers(), valid = lp.filter(Boolean);
+  const avg = (i) => Math.round(valid.reduce((a, p) => a + p.st[i], 0) / (valid.length || 1));
+  const bars = [['PAC', avg(0)], ['SHO', avg(1)], ['PAS', avg(2)], ['DEF', avg(3)]];
+  const inLine = new Set(G.lineup);
+  const bench = G.players.filter((p) => !inLine.has(p.id)).sort((a, b) => b.ovr - a.ovr);
+  $('#squadBox').innerHTML = `
+    <div class="h-row"><h2>Jamoa</h2><small>4-4-2 · ${G.players.length} futbolchi</small></div>
+    <div class="card rate"><div><div class="n">${teamRating()}</div><small style="color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:11px">Reyting</small></div>
+      <div class="bars">${bars.map(([l, v]) => `<div class="b"><span>${l}</span><i><s style="width:${v}%"></s></i><em>${v}</em></div>`).join('')}</div></div>
+    <div class="pitch"><div class="ln mid"></div><div class="ln cc"></div><div class="ln bx1"></div><div class="ln bx2"></div>
+      ${SLOTS.map((s, i) => `<button class="slot ${freshSlot === i ? 'fresh' : ''}" style="left:${s.x}%;top:${s.y}%" data-slot="${i}" aria-label="${s.k} o‘rni">${cardHTML(lp[i], 'mini')}<span class="lab">${s.k}</span></button>`).join('')}
+    </div>
+    <div class="h-row"><h2>Zaxira</h2><small>${bench.length} ta</small></div>
+    <div class="grid-cards">${bench.length ? bench.map((p) => `<button data-pl="${p.id}" aria-label="${esc(p.name)}">${cardHTML(p)}</button>`).join('') : '<p style="color:var(--muted);grid-column:1/-1;text-align:center">Zaxira bo‘sh. Paketlardan yangi futbolchi oling.</p>'}</div>`;
+  freshSlot = -1;
+};
+function openPicker(i) {
+  const s = SLOTS[i], curId = G.lineup[i];
+  const list = G.players.filter((p) => grp(p.pos) === s.g).sort((a, b) => b.ovr - a.ovr);
+  openSheet(`<h3>${s.k} o‘rni</h3>` + list.map((p) => {
+    const at = G.lineup.indexOf(p.id);
+    return `<button class="row ${p.id === curId ? 'on' : ''}" data-pick="${i}:${p.id}">${cardHTML(p, 'mini')}<span class="info">${esc(p.name)}<small>${p.pos} · ${RARN[p.rar]} · ${p.nat}</small></span>${p.id === curId ? '<span class="tag good">O‘ynayapti</span>' : at >= 0 ? '<span class="tag">Almashtir</span>' : ''}</button>`;
+  }).join('') || '<p style="color:var(--muted)">Bu o‘rin uchun futbolchi yo‘q.</p>');
+}
+function openDetail(id) {
+  const p = byId(id); if (!p) return;
+  const labs = p.pos === 'GK' ? ['Sakrash', 'Ushlash', 'Zarba', 'Reaksiya', 'Tezlik'] : ['Tezlik', 'Zarba', 'Uzatma', 'Himoya', 'Kuch'];
+  const inLine = G.lineup.includes(p.id);
+  openSheet(`<div class="detail">${cardHTML(p, 'big')}<div style="text-align:center"><h3 style="margin:0">${esc(p.name)}</h3><span class="tag">${RARN[p.rar]} · ${p.pos} · ${p.nat}</span></div>
+    <div class="sbar">${p.st.map((v, k) => `<div class="b"><span>${labs[k]}</span><i><s style="width:${v}%"></s></i><em>${v}</em></div>`).join('')}</div>
+    ${inLine ? '<span class="tag good">Asosiy tarkibda</span>' : `<button class="btn gold wide" data-sell="${p.id}">Sotish · ${fmt(sellPrice(p))} tanga</button>`}</div>`);
+}
+
+/* ===================== PAKETLAR ===================== */
+RENDER.packs = function () {
+  $('#packsBox').innerHTML = `<div class="h-row"><h2>Paketlar</h2><small>Futbolchi yig‘</small></div>
+    <div class="packs">${PACKS.map((p) => {
+      const ok = (p.cur === 'coins' ? G.coins : G.gems) >= p.cost;
+      return `<div class="packcard"><div class="packart ${p.cls}"><b>${p.name}<span>PAKET</span></b></div><small>${p.note}</small>
+        <button class="btn ${p.cur === 'gems' ? 'hot' : 'gold'} small" data-pack="${p.id}" ${ok ? '' : 'disabled'}>${fmt(p.cost)} ${p.cur === 'coins' ? 'tanga' : 'olmos'}</button></div>`;
+    }).join('')}</div>
+    <p style="color:var(--muted);text-align:center;margin:0;font-size:13px">Tanga va olmosni o‘yin yutib, penalti urib va kunlik sovg‘adan olasiz.</p>`;
+};
+function rollPack(def) {
+  const out = [];
+  for (let i = 0; i < def.n; i++) out.push(mkPlayer(rollPos(), rollOvr(def.min, def.max)));
+  if (def.guar && !out.some((p) => p.ovr >= def.guar)) { const k = ri(0, out.length - 1); out[k] = mkPlayer(rollPos(), ri(def.guar, Math.min(99, def.guar + 6))); }
+  return out.sort((a, b) => a.ovr - b.ovr);
+}
+function openPack(id) {
+  const def = PACKS.find((p) => p.id === id); if (!def) return;
+  if (def.cur === 'coins' ? G.coins < def.cost : G.gems < def.cost) return;
+  if (def.cur === 'coins') G.coins -= def.cost; else G.gems -= def.cost;
+  const cards = rollPack(def); G.players.push(...cards); save(); refreshTop(); sfx('coin');
+  const root = $('#modalRoot'); let idx = -1;
+  root.innerHTML = `<div class="reveal" id="rev"><div class="flash" id="flash"></div><div class="hint" id="rHint">Paketni ochish uchun bos</div><div id="rStage"><button class="packart ${def.cls}" id="rPack" style="width:150px;height:200px" aria-label="Paketni ochish"><b style="font-size:40px">${def.name}<span>PAKET</span></b></button></div></div>`;
+  const flash = () => { const f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); };
+  $('#rPack').addEventListener('click', () => {
+    const pk = $('#rPack'); pk.classList.add('shake'); sfx('reveal');
+    setTimeout(() => { flash(); next(); }, 520);
+  }, { once: true });
+  function next() {
+    idx++;
+    if (idx >= cards.length) return summary();
+    const p = cards[idx], last = idx === cards.length - 1;
+    $('#rHint').textContent = last ? 'Eng yaxshisi! Ochish uchun bos' : 'Ochish uchun bos (' + (idx + 1) + '/' + cards.length + ')';
+    $('#rStage').innerHTML = `<div class="cardwrap"><div class="flip" id="flip" role="button" tabindex="0" aria-label="Kartani ochish"><div class="back">TURON</div><div class="front">${cardHTML(p)}</div></div></div>`;
+    const fl = $('#flip');
+    let opened = false;
+    const open = () => {
+      if (opened) { next(); return; } opened = true; fl.classList.add('done');
+      if (p.rar === 'elite') { sfx('elite'); setTimeout(flash, 380); } else sfx('flip');
+      $('#rHint').textContent = p.name + ' · ' + RARN[p.rar];
+    };
+    fl.addEventListener('click', open);
+    fl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  }
+  function summary() {
+    $('#rHint').textContent = 'Paketdan chiqqanlar';
+    $('#rStage').innerHTML = `<div class="minirow">${cards.map((p) => cardHTML(p, 'mini')).join('')}</div>`;
+    const b = document.createElement('div'); b.style.cssText = 'display:flex;gap:10px;margin-top:6px';
+    b.innerHTML = `<button class="btn ghost" id="rDone">Yopish</button><button class="btn gold" id="rAgain">Yana ochish</button>`;
+    $('#rStage').appendChild(b);
+    $('#rDone').addEventListener('click', () => { closeSheet(); RENDER.packs(); refreshTop(); });
+    $('#rAgain').addEventListener('click', () => { closeSheet(); RENDER.packs(); refreshTop(); openPack(id); });
+    const ok = (def.cur === 'coins' ? G.coins : G.gems) >= def.cost; if (!ok) $('#rAgain').disabled = true;
+  }
+}
+
+/* ===================== LIGA ===================== */
+function freshLeague(season) {
+  return { season, round: 0, teams: Array.from({ length: 8 }, () => ({ p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 })), hist: [] };
+}
+function schedule() {
+  const arr = [0, 1, 2, 3, 4, 5, 6, 7], rounds = [];
+  for (let r = 0; r < 7; r++) {
+    rounds.push(Array.from({ length: 4 }, (_, i) => [arr[i], arr[7 - i]]));
+    arr.splice(1, 0, arr.pop());
+  }
+  return rounds;
+}
+const SCHED = schedule();
+const teamInfo = (i) => i === 0 ? { n: G.club, c: COLS[G.col], r: teamRating() } : CLUBS[i - 1];
+function nextOpp() {
+  const pair = SCHED[Math.min(G.league.round, 6)].find((p) => p.includes(0));
+  const i = pair[0] === 0 ? pair[1] : pair[0];
+  return Object.assign({ i }, CLUBS[i - 1]);
+}
+function leagueTable() {
+  return G.league.teams.map((t, i) => Object.assign({ i }, t, { gd: t.gf - t.ga })).sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+}
+function poisson(l) { let L = Math.exp(-l), k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L); return k - 1; }
+function applyResult(a, b, ga, gb) {
+  const A = G.league.teams[a], B = G.league.teams[b];
+  A.p++; B.p++; A.gf += ga; A.ga += gb; B.gf += gb; B.ga += ga;
+  if (ga > gb) { A.w++; B.l++; A.pts += 3; } else if (ga < gb) { B.w++; A.l++; B.pts += 3; } else { A.d++; B.d++; A.pts++; B.pts++; }
+}
+function simGoals(ra, rb) { return [poisson(1.35 * Math.pow(ra / rb, 1.6)), poisson(1.35 * Math.pow(rb / ra, 1.6))]; }
+function finishMatch(gf, ga, info) {
+  const L = G.league, opp = nextOpp(), round = L.round;
+  applyResult(0, opp.i, gf, ga);
+  SCHED[Math.min(round, 6)].forEach(([a, b]) => { if (a !== 0 && b !== 0) { const [x, y] = simGoals(teamInfo(a).r, teamInfo(b).r); applyResult(a, b, x, y); } });
+  L.hist.push({ r: round + 1, opp: opp.n, gf, ga });
+  L.round++;
+  const res = gf > ga ? 'w' : gf < ga ? 'l' : 'd';
+  const coins = res === 'w' ? 700 : res === 'd' ? 300 : 120, xp = res === 'w' ? 120 : res === 'd' ? 60 : 30;
+  G.stats.played++; if (res === 'w') G.stats.won++; G.stats.goals += gf; G.xp += xp; G.coins += coins;
+  let seasonMsg = '', seasonCoins = 0;
+  if (L.round >= 7) {
+    const rank = leagueTable().findIndex((t) => t.i === 0) + 1;
+    seasonCoins = [6000, 4000, 2500, 1500, 1000, 800, 600, 500][rank - 1];
+    G.coins += seasonCoins;
+    seasonMsg = `Mavsum tugadi: ${rank}-o‘rin! +${fmt(seasonCoins)} tanga${rank === 1 ? ' · CHEMPION!' : ''}`;
+    G.league = freshLeague(L.season + 1);
+  }
+  save(); refreshTop();
+  showResult(gf, ga, opp, res, coins, xp, seasonMsg, info);
+}
+function showResult(gf, ga, opp, res, coins, xp, seasonMsg, info) {
+  const title = res === 'w' ? 'G‘alaba!' : res === 'd' ? 'Durang' : 'Mag‘lubiyat';
+  const colr = res === 'w' ? 'var(--mint)' : res === 'd' ? 'var(--gold)' : 'var(--hot)';
+  sfx(res === 'l' ? 'lose' : 'win');
+  const rows = info ? [['Zarbalar', info.shots[0], info.shots[1]], ['To‘pga egalik', info.poss[0] + '%', info.poss[1] + '%'], ['Seyvlar', info.saves[0], info.saves[1]]] : [];
+  openSheet(`<div class="resbox"><div class="verdict" style="color:${colr}">${title}</div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;font-family:var(--disp);font-weight:700;text-transform:uppercase;font-size:18px"><span>${esc(G.club)}</span><span class="big">${gf} : ${ga}</span><span>${esc(opp.n)}</span></div>
+    ${rows.length ? `<div class="resgrid">${rows.map(([l, a, b]) => `<span>${a}</span><span class="l">${l}</span><span>${b}</span>`).join('')}</div>` : ''}
+    ${info && info.scorers && info.scorers.length ? `<div style="color:var(--muted);font-size:14px">Gol urganlar: ${info.scorers.map(esc).join(', ')}</div>` : ''}
+    <div class="reward"><span class="chip coin"><i></i>+${fmt(coins)}</span><span class="chip" style="color:var(--blue)">+${xp} XP</span></div>
+    ${seasonMsg ? `<div class="card" style="color:var(--gold);font-family:var(--disp);font-weight:700;font-size:19px;text-transform:uppercase">${esc(seasonMsg)}</div>` : ''}
+    <div style="display:flex;gap:10px"><button class="btn ghost wide" data-go="league">Jadval</button><button class="btn wide" data-go="home">Davom etish</button></div></div>`, { center: true, lock: true });
+}
+RENDER.league = function () {
+  const tb = leagueTable(), L = G.league, opp = nextOpp();
+  $('#leagueBox').innerHTML = `<div class="h-row"><h2>Liga</h2><small>${L.season}-mavsum · ${Math.min(L.round, 7)}/7 tur</small></div>
+    <div class="card"><table class="table"><thead><tr><th></th><th style="text-align:left">Jamoa</th><th>O</th><th>G-D-M</th><th>FA</th><th>Och</th></tr></thead><tbody>
+    ${tb.map((t, k) => { const ti = teamInfo(t.i); return `<tr class="${t.i === 0 ? 'me' : ''}"><td class="rk">${k + 1}</td><td><div class="tn"><i class="jersey" style="background:${ti.c}"></i><span>${esc(ti.n)}</span></div></td><td>${t.p}</td><td>${t.w}-${t.d}-${t.l}</td><td>${t.gd > 0 ? '+' : ''}${t.gd}</td><td class="pts">${t.pts}</td></tr>`; }).join('')}
+    </tbody></table></div>
+    <div class="card"><h3 style="font-size:22px;margin-bottom:6px">Natijalar</h3>
+    ${L.hist.length ? L.hist.slice().reverse().map((h) => `<div class="fx"><span class="tm">${esc(G.club)}</span><span class="sc ${h.gf > h.ga ? 'res-w' : h.gf < h.ga ? 'res-l' : 'res-d'}">${h.gf} : ${h.ga}</span><span class="tm r">${esc(h.opp)}</span></div>`).join('') : '<p style="color:var(--muted);margin:6px 0 0">Hali o‘yin yo‘q. Keyingi raqib: ' + esc(opp.n) + '.</p>'}</div>
+    <button class="btn wide" data-go="match">Keyingi o‘yin</button>`;
+};
+
+/* ===================== O'YIN LOBBISI ===================== */
+RENDER.match = function () {
+  const opp = nextOpp(), rate = teamRating(), diff = rate - opp.r;
+  const hint = diff >= 6 ? 'Siz kuchliroqsiz' : diff <= -6 ? 'Raqib kuchliroq. Paketlardan yaxshi futbolchi oling' : 'Teng kuch. Ehtiyot bo‘ling';
+  $('#matchBox').innerHTML = `<div class="h-row"><h2>O‘yin</h2><small>Liga · ${G.league.round + 1}-tur</small></div>
+    <div class="hero"><div class="vs" style="margin-top:4px">
+      <div class="t">${crest(COLS[G.col], 52)}<span>${esc(G.club)}</span><b>${rate}</b></div><div class="x">VS</div>
+      <div class="t">${crest(opp.c, 52)}<span>${esc(opp.n)}</span><b>${opp.r}</b></div></div>
+      <p style="text-align:center;margin:0 0 14px;font-weight:600">${hint}</p>
+      <button class="btn gold wide" data-act="kickoff">Boshlash</button></div>
+    <div class="card stack" style="gap:8px"><h3 style="font-size:22px">Qanday o‘ynaladi</h3>
+      <p style="margin:0;color:var(--muted)">5 ga 5, 90 daqiqa tez rejimda. Chapda joystik bilan yuring, o‘ngda <b style="color:var(--hot)">Zarba</b> va <b style="color:var(--blue)">Uzatma</b>. To‘p sizda bo‘lmasa, Zarba tugmasi to‘pni olishga sakraydi.</p></div>
+    <button class="btn ghost wide" data-act="quicksim">Tezkor hisob (o‘ynamasdan)</button>`;
+};
+
+/* ===================== KUNLIK SOVG'A ===================== */
+RENDER.daily = function () {
+  const D = G.daily, claimed = !canClaim();
+  const next = claimed ? D.streak % 7 : (D.last === yesterday() ? D.streak % 7 : 0);
+  const shown = claimed ? (D.streak - 1) % 7 : next;
+  $('#dailyBox').innerHTML = `<div class="h-row"><h2>Kunlik sovg‘a</h2><small>Ketma-ket: ${claimed ? D.streak : (D.last === yesterday() ? D.streak : 0)} kun</small></div>
+    <div class="days">${DAILY.map((d, i) => {
+      const got = claimed ? i <= shown : i < next, now = !claimed && i === next;
+      return `<div class="day ${d.g && !d.c ? 'gem' : ''} ${got ? 'got' : ''} ${now ? 'now' : ''} ${i === 6 ? 'big' : ''}"><small>${i + 1}-kun</small><b>${d.c ? fmt(d.c) : ''}${d.c && d.g ? ' + ' : ''}${d.g ? d.g + '◆' : ''}</b><small>${d.c ? 'tanga' : 'olmos'}</small></div>`;
+    }).join('')}</div>
+    <button class="btn gold wide" data-act="claim" ${claimed ? 'disabled' : ''}>${claimed ? 'Bugungisi olingan' : 'Sovg‘ani olish'}</button>
+    <p style="color:var(--muted);text-align:center;margin:0;font-size:13px">Har kuni kirsangiz, sovg‘a kattalashadi. Bir kun tashlab ketsangiz, qaytadan boshlanadi.</p>`;
+};
+function claimDaily() {
+  if (!canClaim()) return;
+  const D = G.daily; D.streak = D.last === yesterday() ? D.streak + 1 : 1; D.last = today();
+  const r = DAILY[(D.streak - 1) % 7]; gain(r.c, r.g); sfx('coin'); save(); RENDER.daily();
+}
+
+/* ===================== HODISALAR ===================== */
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  const q = (s) => t.closest(s);
+  let el;
+  if ((el = q('[data-go]'))) { sfx('click'); go(el.dataset.go); return; }
+  if ((el = q('[data-slot]'))) { sfx('click'); openPicker(+el.dataset.slot); return; }
+  if ((el = q('[data-pl]'))) { sfx('click'); openDetail(el.dataset.pl); return; }
+  if ((el = q('[data-pick]'))) {
+    const [i, id] = el.dataset.pick.split(':'), idx = +i, old = G.lineup[idx], at = G.lineup.indexOf(id);
+    if (at >= 0 && at !== idx) G.lineup[at] = old;
+    G.lineup[idx] = id; freshSlot = idx; save(); sfx('click'); closeSheet(); refreshTop(); RENDER.squad(); return;
+  }
+  if ((el = q('[data-sell]'))) {
+    const p = byId(el.dataset.sell); if (!p || G.lineup.includes(p.id)) return;
+    G.players = G.players.filter((x) => x.id !== p.id); gain(sellPrice(p), 0); sfx('coin'); closeSheet(); RENDER.squad(); return;
+  }
+  if ((el = q('[data-pack]'))) { openPack(el.dataset.pack); return; }
+  if ((el = q('[data-col]'))) { G.col = +el.dataset.col; save(); sfx('click'); refreshTop(); RENDER.home(); return; }
+  if ((el = q('[data-act]'))) {
+    const a = el.dataset.act; sfx('click');
+    if (a === 'play') go('match');
+    else if (a === 'kickoff') window.__startMatch();
+    else if (a === 'quicksim') { const o = nextOpp(), [x, y] = simGoals(teamRating(), o.r); finishMatch(x, y, null); }
+    else if (a === 'claim') claimDaily();
+    return;
+  }
+  if (q('#sndBtn')) { G.sound = !G.sound; save(); refreshTop(); sfx('click'); }
+});
+
+window.__core = { G: () => G, byId, lineupPlayers, teamRating, nextOpp, finishMatch, mkPlayer, rarity, cardHTML, crest, sfx, ac, go, clamp, rnd, ri, pick, esc, fmt, TS, gain, save, refreshTop, openSheet, closeSheet, COLS, RENDER, SLOTS, grp };
+initSplash();
+})();
+
+</script>
+<script>
+(function () {
+'use strict';
+const C = window.__core;
+const { clamp, rnd, ri, pick, esc, sfx, TS } = C;
+const $ = (s, r = document) => r.querySelector(s);
+const G = () => C.G();
+
+/* ===================== O'YIN DVIGATELI (5 ga 5) ===================== */
+const PW = 360, PH = 620, PT = 30, PB = 590, PL = 8, PR = 352, GX1 = 130, GX2 = 230, CX = 180, BR = 5, PRAD = 10.5;
+const DUR = 100; // o'yin soniyalari (90 daqiqaga cho'ziladi)
+const HOME = { GK: [180, 566], D1: [105, 480], D2: [255, 480], M: [180, 380], F: [180, 250] };
+const ATTK = { D1: [105, 420], D2: [255, 420], M: [180, 250], F: [180, 120] };
+const ROLES = ['GK', 'D1', 'D2', 'M', 'F'];
+const NUMS = { GK: 1, D1: 4, D2: 5, M: 8, F: 9 };
+const mirror = (y) => PT + PB - y;
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const norm = (x, y) => { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; };
+
+let M = null;
+const K = { x: 0, y: 0, shoot: false, pass: false };
+const J = { x: 0, y: 0 };
+let pitchCache = null, pitchDpr = 0;
+
+function unit(team, role, src, R) {
+  const h = HOME[role], x = h[0], y = team === 0 ? h[1] : mirror(h[1]);
+  let st;
+  if (src) st = src.st; else st = [0, 1, 2, 3, 4].map(() => clamp(R + ri(-5, 5), 30, 97));
+  const att = { pac: st[0], sho: st[1], pas: st[2], def: st[3], gk: role === 'GK' ? (st[0] + st[1] + st[3]) / 3 : 0 };
+  if (role === 'GK' && !src) att.gk = clamp(R + ri(-3, 4), 40, 95);
+  if (role === 'GK') att.pac = 60;
+  const first = pick(['A.', 'B.', 'S.', 'J.', 'O.', 'T.', 'M.', 'L.', 'K.', 'D.']), last = pick(['Rahimov', 'Nazarov', 'Silva', 'Moretti', 'Varga', 'Kovac', 'Okafor', 'Duarte', 'Petrov', 'Karimov']);
+  return { team, role, x, y, vx: 0, vy: 0, fx: 0, fy: team === 0 ? -1 : 1, home: { x, y }, att, spd: (role === 'GK' ? 118 + att.gk * 0.55 : 96 + att.pac * 0.72) * (team === 1 ? .94 : 1), lock: 0, dash: 0, dashCd: 0, think: rnd(0, .3), hold: 0, num: NUMS[role], name: src ? src.short : first + ' ' + last, chaser: false };
+}
+
+window.__startMatch = function () {
+  const opp = C.nextOpp(), lp = C.lineupPlayers().filter(Boolean);
+  const best = (g, n) => lp.filter((p) => C.grp(p.pos) === g).sort((a, b) => b.ovr - a.ovr).slice(0, n);
+  const gk = best('GK', 1)[0], df = best('DEF', 2), md = best('MID', 1)[0], fw = best('FWD', 1)[0];
+  const mine = [unit(0, 'GK', gk), unit(0, 'D1', df[0]), unit(0, 'D2', df[1]), unit(0, 'M', md), unit(0, 'F', fw)];
+  const theirs = ROLES.map((r) => unit(1, r, null, opp.r));
+  M = { opp, players: [...mine, ...theirs], ball: { x: CX, y: 310, vx: 0, vy: 0, owner: null, last: null, tried: false }, score: [0, 0], T: 0, state: 'play', celeb: 0, kickTeam: 1,
+    halfDone: false, active: mine[3], swT: 0, stats: { shots: [0, 0], saves: [0, 0], poss: [0, 0] }, scorers: [], parts: [], trail: [], paused: false, raf: 0, last: performance.now(), ctT: 0, lblA: '', lblB: '', flashT: 0, flashTxt: '' };
+  resetKick(0);
+  $('#hudN0').textContent = G().club; $('#hudN1').textContent = opp.n;
+  $('#hudJ0').style.background = C.COLS[G().col]; $('#hudJ1').style.background = opp.c;
+  $('#s-play').classList.remove('off');
+  $('#banner').className = 'banner'; setupCanvas();
+  banner('BOSHLANDI', G().club + ' – ' + opp.n); sfx('whistle');
+  M.raf = requestAnimationFrame(loop);
+};
+
+window.__tfc = { state: () => M };
+function resetKick(team) {
+  const m = M;
+  m.players.forEach((p) => { p.x = p.home.x; p.y = p.home.y; p.vx = p.vy = 0; p.lock = 0; p.dash = 0; p.fx = 0; p.fy = p.team === 0 ? -1 : 1; });
+  const k = m.players.find((p) => p.team === team && p.role === 'F');
+  m.ball.x = CX; m.ball.y = 310; m.ball.vx = m.ball.vy = 0; m.ball.owner = null; m.ball.tried = false; m.ball.last = null;
+  k.x = CX; k.y = team === 0 ? 316 : 304; m.ball.owner = k; m.ball.last = k;
+  if (team === 0) m.active = k;
+  m.trail.length = 0;
+}
+
+function setupCanvas() {
+  const cv = $('#pitchCv'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(PW * dpr); cv.height = Math.round(PH * dpr);
+  if (pitchDpr !== dpr || !pitchCache) { pitchCache = buildPitch(dpr); pitchDpr = dpr; }
+}
+
+function buildPitch(dpr) {
+  const c = document.createElement('canvas'); c.width = Math.round(PW * dpr); c.height = Math.round(PH * dpr);
+  const x = c.getContext('2d'); x.scale(dpr, dpr);
+  x.fillStyle = '#0d5226'; x.fillRect(0, 0, PW, PH);
+  const n = 14, h = (PB - PT) / n;
+  for (let i = 0; i < n; i++) { x.fillStyle = i % 2 ? '#1d9448' : '#22a553'; x.fillRect(PL, PT + i * h, PR - PL, h + 1); }
+  x.strokeStyle = 'rgba(255,255,255,.88)'; x.lineWidth = 2;
+  x.strokeRect(PL, PT, PR - PL, PB - PT);
+  x.beginPath(); x.moveTo(PL, 310); x.lineTo(PR, 310); x.stroke();
+  x.beginPath(); x.arc(CX, 310, 46, 0, 7); x.stroke();
+  x.fillStyle = '#fff'; x.beginPath(); x.arc(CX, 310, 3, 0, 7); x.fill();
+  x.strokeRect(100, PT, 160, 78); x.strokeRect(100, PB - 78, 160, 78);
+  x.strokeRect(GX1, PT, GX2 - GX1, 28); x.strokeRect(GX1, PB - 28, GX2 - GX1, 28);
+  x.beginPath(); x.arc(CX, PT + 54, 2.5, 0, 7); x.fill(); x.beginPath(); x.arc(CX, PB - 54, 2.5, 0, 7); x.fill();
+  x.beginPath(); x.arc(CX, PT + 78, 28, .2 * Math.PI, .8 * Math.PI); x.stroke();
+  x.beginPath(); x.arc(CX, PB - 78, 28, 1.2 * Math.PI, 1.8 * Math.PI); x.stroke();
+  [[PL, PT, 0], [PR, PT, 1], [PL, PB, 3], [PR, PB, 2]].forEach(([cx, cy, q]) => { x.beginPath(); x.arc(cx, cy, 10, q * Math.PI / 2, (q + 1) * Math.PI / 2); x.stroke(); });
+  // darvozalar (to'r)
+  [[PT - 18, PT], [PB, PB + 18]].forEach(([y0, y1]) => {
+    x.fillStyle = 'rgba(255,255,255,.14)'; x.fillRect(GX1, y0, GX2 - GX1, y1 - y0);
+    x.strokeStyle = 'rgba(255,255,255,.4)'; x.lineWidth = 1;
+    for (let i = GX1; i <= GX2; i += 8) { x.beginPath(); x.moveTo(i, y0); x.lineTo(i, y1); x.stroke(); }
+    for (let j = y0; j <= y1; j += 6) { x.beginPath(); x.moveTo(GX1, j); x.lineTo(GX2, j); x.stroke(); }
+    x.strokeStyle = '#fff'; x.lineWidth = 3; x.strokeRect(GX1, y0, GX2 - GX1, y1 - y0);
+  });
+  return c;
+}
+
+/* ---------- kiritish ---------- */
+function inputVec() {
+  const kx = K.x, ky = K.y;
+  if (kx || ky) { const [a, b] = norm(kx, ky); return [a, b]; }
+  return [J.x, J.y];
+}
+
+/* ---------- harakat ---------- */
+function moveTo(p, tx, ty, sp, dt, kk) {
+  const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
+  let vx = 0, vy = 0;
+  if (d > 3) { const f = Math.min(1, d / 18); vx = dx / d * p.spd * sp * f; vy = dy / d * p.spd * sp * f; }
+  const k = Math.min(1, dt * (kk || 9));
+  p.vx += (vx - p.vx) * k; p.vy += (vy - p.vy) * k;
+}
+function face(p, x, y, k) { const [a, b] = norm(x, y); p.fx += (a - p.fx) * k; p.fy += (b - p.fy) * k; const [c, d] = norm(p.fx, p.fy); p.fx = c; p.fy = d; }
+
+function teammates(p) { return M.players.filter((q) => q.team === p.team && q !== p); }
+function opponents(p) { return M.players.filter((q) => q.team !== p.team); }
+
+function bestPass(p, hx, hy) {
+  const gdir = p.team === 0 ? -1 : 1; let best = null, bs = -9;
+  for (const q of teammates(p)) {
+    if (q.role === 'GK' && hx !== undefined) continue;
+    const dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy); if (d < 36) continue;
+    let s;
+    if (hx !== undefined) { const dot = (dx * hx + dy * hy) / d; if (dot < .5) continue; s = dot * 1.2 - d * .0012; }
+    else s = (dy * gdir) * .005 - d * .0016 + (q.role === 'GK' ? -2 : 0);
+    for (const o of opponents(p)) { if (o.role !== 'GK' && Math.hypot(o.x - q.x, o.y - q.y) < 30) { s -= .5; break; } }
+    if (s > bs) { bs = s; best = q; }
+  }
+  return best;
+}
+function kick(p, dx, dy, speed) {
+  const b = M.ball; const [a, c] = norm(dx, dy);
+  b.owner = null; b.x = p.x + a * 14; b.y = p.y + c * 14; b.vx = a * speed; b.vy = c * speed; b.last = p; b.tried = false; p.lock = .32; p.fx = a; p.fy = c;
+}
+function doPass(p, q) {
+  if (!q) { kick(p, p.fx, p.fy, 300); sfx('kick'); return; }
+  const dx = q.x + q.vx * .35 - p.x, dy = q.y + q.vy * .35 - p.y, d = Math.hypot(dx, dy);
+  kick(p, dx, dy, clamp(d * 1.8 + 140, 210, 400)); sfx('kick');
+}
+function doShoot(p, user) {
+  const t = p.team, gy = t === 0 ? PT : PB; let ax, ay;
+  if (user) {
+    const [gx, gyv] = norm(CX - p.x, gy - p.y), dot = p.fx * gx + p.fy * gyv;
+    if (dot > .45) {
+      const dyy = (gy - p.y) * (t === 0 ? 1 : -1) > 0 ? 0 : 0;
+      let aimx = CX;
+      if (Math.abs(p.fy) > .12 && Math.sign(p.fy) === Math.sign(gy - p.y)) aimx = clamp(p.x + p.fx / Math.abs(p.fy) * Math.abs(gy - p.y), GX1 + 12, GX2 - 12);
+      ax = aimx - p.x; ay = gy - p.y + dyy;
+    } else { ax = p.fx; ay = p.fy; }
+  } else { const cx = CX + (Math.random() < .5 ? -1 : 1) * rnd(10, 34); ax = cx - p.x; ay = gy - p.y; }
+  let ang = Math.atan2(ay, ax) + rnd(-1, 1) * (user ? (1 - p.att.sho / 112) * .22 : .10 + (1 - p.att.sho / 112) * .34);
+  const sp = (400 + p.att.sho * 1.5 + rnd(0, 25)) * (user ? 1 : .93);
+  kick(p, Math.cos(ang), Math.sin(ang), sp);
+  M.stats.shots[t]++; sfx('kick');
+}
+
+/* ---------- sun'iy intellekt ---------- */
+function assignChasers() {
+  const b = M.ball;
+  for (const team of [0, 1]) {
+    const pl = M.players.filter((p) => p.team === team);
+    pl.forEach((p) => { p.chaser = false; });
+    if (b.owner && b.owner.team === team) continue;
+    const cand = pl.filter((p) => p.role !== 'GK' && !(team === 0 && p === M.active));
+    cand.sort((a, c) => dist(a, b) - dist(c, b));
+    if (cand[0]) cand[0].chaser = true;
+    if (b.owner && b.owner.team !== team && cand[1] && dist(cand[1], b) < 90) cand[1].chaser = true;
+  }
+}
+function aiGoalie(p, dt) {
+  const t = p.team, b = M.ball, line = t === 0 ? PB - 24 : PT + 24;
+  if (b.owner === p) {
+    p.hold -= dt; p.vx *= .8; p.vy *= .8;
+    if (p.hold <= 0) { const q = bestPass(p); if (q) doPass(p, q); else kick(p, 0, t === 0 ? -1 : 1, 330); }
+    return;
+  }
+  const toward = t === 0 ? b.vy > 0 : b.vy < 0;
+  let tx = CX + (b.x - CX) * .38, ty = line, sp = 1;
+  if (!b.owner && toward && Math.abs(b.vy) > 70) {
+    const k = (line - b.y) / b.vy;
+    if (k > 0 && k < 1.5) { tx = b.x + b.vx * k; sp = 2.7; }
+  }
+  if (!b.owner && Math.hypot(b.vx, b.vy) < 120 && Math.abs(b.y - line) < 95 && b.x > GX1 - 36 && b.x < GX2 + 36) { tx = b.x; ty = b.y; sp = 1.2; }
+  tx = clamp(tx, GX1 + 8, GX2 - 8);
+  moveTo(p, tx, ty, sp, dt, 18);
+  face(p, b.x - p.x, b.y - p.y, .2);
+}
+function aiCarrier(p, dt) {
+  const t = p.team, dir = t === 0 ? -1 : 1, gy = t === 0 ? PT : PB, gd = Math.hypot(CX - p.x, gy - p.y);
+  let ax = 0, press = false;
+  for (const q of M.players) {
+    if (q.team === t || q.role === 'GK') continue;
+    const dx = q.x - p.x, dy = (q.y - p.y) * dir;
+    if (dy > -6 && dy < 82 && Math.abs(dx) < 34) ax -= Math.sign(dx || (Math.random() - .5)) * (1 - Math.abs(dx) / 34) * 80;
+    if (Math.hypot(q.x - p.x, q.y - p.y) < 32) press = true;
+  }
+  const [dx, dy] = norm(CX - p.x + ax * 2.6, gy - p.y);
+  moveTo(p, p.x + dx * 100, p.y + dy * 100, .96, dt);
+  face(p, dx, dy, .25);
+  p.think -= dt;
+  if (p.think <= 0) {
+    p.think = rnd(.28, .45);
+    const range = (p.role === 'D1' || p.role === 'D2') ? 105 : 120 + p.att.sho * .34;
+    if (gd < range && Math.random() < .3) { doShoot(p, false); return; }
+    if ((press && Math.random() < .55) || ((p.role === 'D1' || p.role === 'D2') && Math.abs(p.y - (t === 0 ? 480 : 140)) < 70 && Math.random() < .55)) {
+      const q = bestPass(p); if (q) doPass(p, q);
+    }
+  }
+}
+function aiMove(p, dt) {
+  if (p.role === 'GK') { aiGoalie(p, dt); return; }
+  const t = p.team, b = M.ball, own = b.owner;
+  if (own === p) { aiCarrier(p, dt); return; }
+  const teamHas = own && own.team === t;
+  let tx, ty, sp = 1;
+  const at = ATTK[p.role], hm = p.home;
+  if (teamHas) {
+    tx = at[0]; ty = t === 0 ? at[1] : mirror(at[1]);
+    tx += (p.x < own.x ? -1 : 1) * 24; tx = clamp(tx, 30, 330);
+    sp = .9;
+  } else if (p.chaser) {
+    if (own) { tx = own.x - (own.fx || 0) * 6; ty = own.y - (own.fy || 0) * 6; } else { tx = b.x + b.vx * .25; ty = b.y + b.vy * .25; }
+    sp = 1.02;
+  } else {
+    tx = hm.x + (b.x - CX) * .2; ty = hm.y + (b.y - 310) * .22;
+    if (t === 0) ty = clamp(ty, 250, 540); else ty = clamp(ty, 80, 370);
+    if (!own && Math.hypot(b.x - p.x, b.y - p.y) < 70) { tx = b.x; ty = b.y; }
+  }
+  moveTo(p, tx, ty, sp, dt);
+  if (Math.hypot(p.vx, p.vy) > 20) face(p, p.vx, p.vy, .2);
+}
+
+/* ---------- asosiy qadam ---------- */
+function banner(text, sub) {
+  const el = $('#banner'); el.innerHTML = esc(text) + (sub ? `<small>${esc(sub)}</small>` : '');
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+function updateActive(dt) {
+  const b = M.ball, mine = M.players.filter((p) => p.team === 0 && p.role !== 'GK');
+  if (b.owner && b.owner.team === 0 && b.owner.role !== 'GK') { M.active = b.owner; return; }
+  M.swT -= dt;
+  if (M.swT > 0 && M.active && M.active.role !== 'GK') return;
+  mine.sort((a, c) => dist(a, b) - dist(c, b));
+  if (!M.active || M.active.role === 'GK' || dist(mine[0], b) < dist(M.active, b) - 14) M.active = mine[0];
+  M.swT = .25;
+}
+function manualSwitch() {
+  const b = M.ball, mine = M.players.filter((p) => p.team === 0 && p.role !== 'GK' && p !== M.active).sort((a, c) => dist(a, b) - dist(c, b));
+  if (mine[0]) { M.active = mine[0]; M.swT = .8; sfx('click'); }
+}
+function userActions(p) {
+  const b = M.ball;
+  if (K.shoot) {
+    K.shoot = false;
+    if (b.owner === p) doShoot(p, true);
+    else if (!b.owner && dist(p, b) < 24 && p.lock <= 0) { doShoot(p, true); }
+    else if (p.dashCd <= 0) { p.dash = .28; p.dashCd = .75; const tgt = b.owner && b.owner.team === 1 ? b.owner : b; const [a, c] = norm(tgt.x - p.x, tgt.y - p.y); p.vx = a * p.spd * 1.9; p.vy = c * p.spd * 1.9; sfx('tackle'); }
+  }
+  if (K.pass) {
+    K.pass = false;
+    if (b.owner === p) {
+      const [ix, iy] = inputVec(), has = Math.hypot(ix, iy) > .25;
+      const hx = has ? ix : p.fx, hy = has ? iy : p.fy;
+      const q = bestPass(p, hx, hy); if (q) doPass(p, q); else { kick(p, hx, hy, 300); sfx('kick'); }
+    } else manualSwitch();
+  }
+}
+function step(dt) {
+  const m = M;
+  if (m.state === 'goal') { m.celeb -= dt; stepParts(dt); if (m.celeb <= 0) { resetKick(m.kickTeam); m.state = 'play'; sfx('whistle'); } return; }
+  if (m.state === 'half') { m.celeb -= dt; if (m.celeb <= 0) { resetKick(1); m.state = 'play'; sfx('whistle'); } return; }
+  if (m.state !== 'play') return;
+  m.T += dt;
+  if (!m.halfDone && m.T >= DUR / 2) { m.halfDone = true; m.state = 'half'; m.celeb = 1.5; banner('TANAFFUS', m.score[0] + ' : ' + m.score[1]); sfx('whistle'); return; }
+  if (m.T >= DUR) { endMatch(); return; }
+  const b = m.ball;
+  m.ctT -= dt; if (m.ctT <= 0) { assignChasers(); m.ctT = .2; }
+  updateActive(dt);
+  for (const p of m.players) { if (p.lock > 0) p.lock -= dt; if (p.dashCd > 0) p.dashCd -= dt; }
+  // foydalanuvchi
+  const a = m.active;
+  if (a) {
+    userActions(a);
+    if (a.dash > 0) { a.dash -= dt; }
+    else {
+      const [ix, iy] = inputVec(), mag = Math.hypot(ix, iy);
+      const tvx = mag > .15 ? ix * a.spd : 0, tvy = mag > .15 ? iy * a.spd : 0, k = Math.min(1, dt * 11);
+      a.vx += (tvx - a.vx) * k; a.vy += (tvy - a.vy) * k;
+      if (mag > .15) face(a, ix, iy, .35);
+    }
+  }
+  for (const p of m.players) if (p !== a) { aiMove(p, dt); if (p.dash > 0) p.dash -= dt; }
+  // joylashuv
+  for (const p of m.players) {
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.x = clamp(p.x, PL + PRAD, PR - PRAD);
+    p.y = clamp(p.y, PT + PRAD, PB - PRAD);
+  }
+  for (let i = 0; i < m.players.length; i++) for (let j = i + 1; j < m.players.length; j++) {
+    const p = m.players[i], q = m.players[j], d = dist(p, q);
+    if (d < PRAD * 1.7 && d > .01) { const o = (PRAD * 1.7 - d) / 2, nx = (p.x - q.x) / d, ny = (p.y - q.y) / d; p.x += nx * o; p.y += ny * o; q.x -= nx * o; q.y -= ny * o; }
+  }
+  ballStep(dt);
+  stepParts(dt);
+}
+function ballStep(dt) {
+  const m = M, b = m.ball;
+  if (b.owner) {
+    const o = b.owner;
+    b.x = clamp(o.x + o.fx * 12, PL + BR, PR - BR); b.y = clamp(o.y + o.fy * 12, PT + BR, PB - BR); b.vx = b.vy = 0; b.last = o;
+    m.stats.poss[o.team] += dt;
+    if (o.role !== 'GK') for (const q of m.players) {
+      if (q.team === o.team || q.role === 'GK' || q.lock > 0) continue;
+      if (dist(q, o) < 17) {
+        let k = 1.35 * q.att.def / (q.att.def + o.att.pac * .55 + 10);
+        if (q.dash > 0) k *= 4.5; if (o === m.active) k *= .8;
+        if (Math.random() < k * dt) { b.owner = q; b.last = q; o.lock = .55; q.lock = 0; sfx('tackle'); break; }
+      }
+    }
+    return;
+  }
+  b.x += b.vx * dt; b.y += b.vy * dt;
+  const f = Math.exp(-1.15 * dt); b.vx *= f; b.vy *= f;
+  const sp = Math.hypot(b.vx, b.vy);
+  if (sp > 280) { m.trail.push([b.x, b.y]); if (m.trail.length > 7) m.trail.shift(); } else if (m.trail.length) m.trail.shift();
+  // devorlar va darvoza
+  const inMouth = b.x > GX1 && b.x < GX2;
+  if (b.x < PL + BR) { b.x = PL + BR; b.vx = Math.abs(b.vx) * .7; } else if (b.x > PR - BR) { b.x = PR - BR; b.vx = -Math.abs(b.vx) * .7; }
+  if (b.y < PT) { if (inMouth) { goal(0); return; } if (b.y < PT + BR) { b.y = PT + BR; b.vy = Math.abs(b.vy) * .7; } }
+  else if (b.y > PB) { if (inMouth) { goal(1); return; } if (b.y > PB - BR) { b.y = PB - BR; b.vy = -Math.abs(b.vy) * .7; } }
+  // olish / blok / seyv
+  let cand = null, cd = 99;
+  for (const p of m.players) {
+    if (p.lock > 0) continue;
+    const d = dist(p, b), reach = p.role === 'GK' ? 27 : 13.5;
+    if (d < reach) {
+      if (p.role === 'GK') {
+        if (sp < 220) { if (d < cd) { cand = p; cd = d; } }
+        else if (!b.tried && b.last && b.last.team !== p.team) {
+          b.tried = true;
+          const pr = clamp(.74 + (p.att.gk - 70) * .008 - (sp - 450) * .0004, .38, .92);
+          if (Math.random() < pr) { b.owner = p; b.vx = b.vy = 0; p.hold = .9; m.stats.saves[p.team]++; sfx('save'); m.flashTxt = 'SEYV!'; m.flashT = .8; return; }
+          if (Math.random() < .35) { b.vy *= -.5; b.vx = rnd(-160, 160); b.last = p; sfx('save'); }
+        }
+      } else {
+        const own = b.last && b.last.team === p.team;
+        if (sp < (own ? 380 : 250)) { if (d < cd) { cand = p; cd = d; } }
+        else if (!own && d < 11) { b.vx = -b.vx * .35 + rnd(-70, 70); b.vy = -b.vy * .35 + rnd(-70, 70); p.lock = .2; b.last = p; sfx('tackle'); }
+      }
+    }
+  }
+  if (cand) { b.owner = cand; b.vx = b.vy = 0; b.last = cand; if (cand.role === 'GK') cand.hold = .8; }
+}
+function goal(team) {
+  const m = M; m.score[team]++;
+  const last = m.ball.last, own = last && last.team !== team;
+  const who = !last ? '' : own ? 'Avtogol' : last.name;
+  if (team === 0) m.scorers.push((own ? 'Avtogol' : last ? last.name : '') + ' ' + Math.floor(m.T / DUR * 90) + '’');
+  m.state = 'goal'; m.celeb = 2.0; m.kickTeam = 1 - team; m.ball.vx = m.ball.vy = 0; m.ball.owner = null; m.trail.length = 0;
+  banner('GOL!', who); sfx('goal');
+  const cols = ['#ffc93c', '#25f0b0', '#ff3d85', '#3ea8ff', '#fff'];
+  for (let i = 0; i < 70; i++) m.parts.push({ x: CX + rnd(-60, 60), y: team === 0 ? PT + 10 : PB - 10, vx: rnd(-170, 170), vy: (team === 0 ? 1 : -1) * rnd(40, 260), life: rnd(1.2, 2.2), c: pick(cols), s: rnd(2, 4) });
+}
+function stepParts(dt) { M.parts.forEach((p) => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 220 * dt; p.vx *= .99; p.life -= dt; }); M.parts = M.parts.filter((p) => p.life > 0); }
+
+function endMatch() {
+  const m = M; m.state = 'end';
+  const gf = m.score[0], ga = m.score[1], tot = (m.stats.poss[0] + m.stats.poss[1]) || 1;
+  const p0 = Math.round(m.stats.poss[0] / tot * 100);
+  const info = { shots: m.stats.shots, saves: m.stats.saves, poss: [p0, 100 - p0], scorers: m.scorers };
+  sfx('whistle'); cancelAnimationFrame(m.raf); M = null; K.x = K.y = 0; J.x = J.y = 0;
+  $('#s-play').classList.add('off');
+  C.go('match');
+  C.finishMatch(gf, ga, info);
+}
+
+/* ---------- chizish ---------- */
+function draw() {
+  const m = M, cv = $('#pitchCv'), x = cv.getContext('2d'), dpr = cv.width / PW;
+  x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  x.drawImage(pitchCache, 0, 0, PW, PH);
+  const c0 = C.COLS[G().col], c1 = m.opp.c;
+  // soyalar
+  x.fillStyle = 'rgba(0,0,0,.22)';
+  for (const p of m.players) { x.beginPath(); x.ellipse(p.x + 2, p.y + 6, 10, 5, 0, 0, 7); x.fill(); }
+  // iz
+  if (m.trail.length > 1) { x.strokeStyle = 'rgba(255,255,255,.4)'; x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.moveTo(m.trail[0][0], m.trail[0][1]); m.trail.forEach((t) => x.lineTo(t[0], t[1])); x.stroke(); }
+  // futbolchilar
+  const order = [...m.players].sort((a, b) => a.y - b.y);
+  for (const p of order) {
+    const col = p.team === 0 ? c0 : c1;
+    if (p === m.active && m.state === 'play') {
+      const pulse = 1 + Math.sin(performance.now() / 160) * .12;
+      x.strokeStyle = '#fff'; x.lineWidth = 2.5; x.beginPath(); x.arc(p.x, p.y, (PRAD + 5) * pulse, 0, 7); x.stroke();
+      x.fillStyle = '#fff'; x.beginPath(); x.moveTo(p.x, p.y - 27); x.lineTo(p.x - 6, p.y - 36); x.lineTo(p.x + 6, p.y - 36); x.closePath(); x.fill();
+    }
+    x.fillStyle = p.role === 'GK' ? '#1c1c34' : col; x.strokeStyle = p.role === 'GK' ? col : 'rgba(0,0,0,.45)'; x.lineWidth = p.role === 'GK' ? 3 : 2;
+    x.beginPath(); x.arc(p.x, p.y, PRAD, 0, 7); x.fill(); x.stroke();
+    x.fillStyle = p.role === 'GK' ? '#fff' : '#10102a'; x.font = '700 11px Barlow Condensed, Arial Narrow, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(p.num, p.x, p.y + .5);
+    x.fillStyle = 'rgba(255,255,255,.85)'; x.beginPath(); x.arc(p.x + p.fx * 5.5, p.y + p.fy * 5.5 - 3.5, 1.6, 0, 7); x.fill();
+  }
+  // to'p
+  const b = m.ball;
+  x.fillStyle = 'rgba(0,0,0,.3)'; x.beginPath(); x.ellipse(b.x + 1.5, b.y + 4, 5, 2.6, 0, 0, 7); x.fill();
+  x.fillStyle = '#fff'; x.strokeStyle = '#222'; x.lineWidth = 1.4; x.beginPath(); x.arc(b.x, b.y, BR, 0, 7); x.fill(); x.stroke();
+  x.fillStyle = '#222'; x.beginPath(); x.arc(b.x, b.y, 1.8, 0, 7); x.fill();
+  // konfetti
+  for (const p of m.parts) { x.globalAlpha = clamp(p.life, 0, 1); x.fillStyle = p.c; x.fillRect(p.x, p.y, p.s, p.s * 1.6); }
+  x.globalAlpha = 1;
+  if (m.flashT > 0) { x.globalAlpha = clamp(m.flashT * 2, 0, 1); x.fillStyle = '#fff'; x.font = '800 40px Barlow Condensed, Arial Narrow, sans-serif'; x.textAlign = 'center'; x.fillText(m.flashTxt, CX, 300); x.globalAlpha = 1; }
+}
+function hud() {
+  const m = M; if (!m) return;
+  if (m.flashT > 0) m.flashT -= 1 / 60;
+  $('#hudScore').textContent = m.score[0] + ' : ' + m.score[1];
+  $('#hudClock').textContent = Math.min(90, Math.floor(m.T / DUR * 90)) + '’';
+  const atk = m.active && m.ball.owner === m.active;
+  const la = atk ? 'Zarba' : 'Takl', lb = atk ? 'Uzatma' : 'Almash';
+  if (m.lblA !== la) { $('#btnA').textContent = la; m.lblA = la; }
+  if (m.lblB !== lb) { $('#btnB').textContent = lb; m.lblB = lb; }
+}
+function loop(ts) {
+  if (!M) return;
+  const m = M; m.raf = requestAnimationFrame(loop);
+  if (m.paused) { m.last = ts; return; }
+  const dt = Math.min(.05, (ts - m.last) / 1000 || 0); m.last = ts;
+  let rem = dt * TS;
+  while (rem > 0 && M === m) { const s = Math.min(1 / 60, rem); step(s); rem -= s; }
+  if (M !== m) return;
+  draw(); hud();
+}
+
+/* ---------- boshqaruv: joystik, tugmalar, klaviatura ---------- */
+(function bindControls() {
+  const joy = $('#joy'), knob = $('#joyKnob'); let pid = null;
+  const R = 54;
+  const upd = (e) => {
+    const r = joy.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let dx = e.clientX - cx, dy = e.clientY - cy; const d = Math.hypot(dx, dy);
+    if (d > R) { dx = dx / d * R; dy = dy / d * R; }
+    J.x = dx / R; J.y = dy / R; knob.style.transform = `translate(${dx}px,${dy}px)`;
+  };
+  joy.addEventListener('pointerdown', (e) => { pid = e.pointerId; joy.setPointerCapture(pid); upd(e); e.preventDefault(); });
+  joy.addEventListener('pointermove', (e) => { if (e.pointerId === pid) upd(e); });
+  const end = (e) => { if (e.pointerId === pid) { pid = null; J.x = J.y = 0; knob.style.transform = ''; } };
+  joy.addEventListener('pointerup', end); joy.addEventListener('pointercancel', end);
+  const btn = (el, key) => {
+    el.addEventListener('pointerdown', (e) => { e.preventDefault(); K[key] = true; el.classList.add('down'); });
+    const up = () => el.classList.remove('down');
+    el.addEventListener('pointerup', up); el.addEventListener('pointerleave', up); el.addEventListener('pointercancel', up);
+  };
+  btn($('#btnA'), 'shoot'); btn($('#btnB'), 'pass');
+  const keys = new Set();
+  const calc = () => { K.x = (keys.has('ArrowRight') || keys.has('d') ? 1 : 0) - (keys.has('ArrowLeft') || keys.has('a') ? 1 : 0); K.y = (keys.has('ArrowDown') || keys.has('s') ? 1 : 0) - (keys.has('ArrowUp') || keys.has('w') ? 1 : 0); };
+  addEventListener('keydown', (e) => {
+    if (!M) return;
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(k)) e.preventDefault();
+    if (k === ' ' || k === 'j') { if (!e.repeat) K.shoot = true; }
+    else if (k === 'Shift' || k === 'k') { if (!e.repeat) K.pass = true; }
+    else if (k === 'q') manualSwitch();
+    else if (k === 'Escape') pause();
+    else { keys.add(k); calc(); }
+  });
+  addEventListener('keyup', (e) => { const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys.delete(k); calc(); });
+  $('#quitBtn').addEventListener('click', pause);
+})();
+function pause() {
+  if (!M || M.paused) return; M.paused = true;
+  C.openSheet(`<div class="resbox"><div class="verdict">Pauza</div><p style="margin:0;color:var(--muted)">Chiqsangiz, bu o‘yin hisoblanmaydi.</p>
+    <div style="display:flex;gap:10px"><button class="btn ghost wide" id="qExit">Chiqish</button><button class="btn wide" id="qResume">Davom etish</button></div></div>`, { center: true, lock: true });
+  $('#qResume').addEventListener('click', () => { C.closeSheet(); if (M) M.paused = false; });
+  $('#qExit').addEventListener('click', () => { C.closeSheet(); if (M) { cancelAnimationFrame(M.raf); M = null; } K.x = K.y = 0; J.x = J.y = 0; $('#s-play').classList.add('off'); C.go('match'); });
+}
+
+/* ===================== PENALTI ===================== */
+const PWD = 360, PHT = 440, GL = 52, GR = 308, GT = 62, GB = 200;
+let P = null, penRaf = 0;
+C.RENDER.pen = function () {
+  cancelAnimationFrame(penRaf);
+  P = { n: 0, goals: 0, res: [], phase: 'aim', tx: null, ty: null, m: 0, t0: performance.now(), anim: null, msg: '', msgT: 0, net: 0, done: false };
+  $('#penBox').innerHTML = `<div class="h-row"><h2>Penalti</h2><small>5 zarba</small></div>
+    <div class="pips" id="pips"></div>
+    <canvas id="penCv" width="${PWD * 2}" height="${PHT * 2}" aria-label="Penalti maydoni"></canvas>
+    <div class="meter" id="meter" aria-hidden="true"><i id="meterI"></i></div>
+    <div id="penHint" style="text-align:center;color:var(--muted);min-height:20px;font-weight:600"></div>
+    <button class="btn wide" id="penShoot" disabled>Zarba!</button>`;
+  const cv = $('#penCv');
+  cv.addEventListener('pointerdown', (e) => {
+    if (P.phase !== 'aim' && P.phase !== 'meter') return; C.ac();
+    const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * PWD, y = (e.clientY - r.top) / r.height * PHT;
+    P.tx = clamp(x, GL + 4, GR - 4); P.ty = clamp(y, GT + 6, GB - 6); P.phase = 'meter'; P.t0 = performance.now(); sfx('click');
+    $('#penShoot').disabled = false;
+  });
+  $('#penShoot').addEventListener('click', penShoot);
+  penPips(); penLoop();
+};
+function penPips() {
+  const el = $('#pips'); if (!el) return;
+  el.innerHTML = Array.from({ length: 5 }, (_, i) => `<span class="pip ${P.res[i] === 1 ? 'g' : P.res[i] === 0 ? 'm' : ''}">${P.res[i] === 1 ? '✓' : P.res[i] === 0 ? '✕' : ''}</span>`).join('');
+}
+function penShoot() {
+  if (P.phase !== 'meter') return;
+  const m = Math.sin((performance.now() - P.t0) / 1000 * 3.1);
+  P.m = m; P.phase = 'shot'; $('#penShoot').disabled = true;
+  const dev = Math.abs(m) < .1 ? m * .2 : m;
+  const fx = P.tx + dev * 62 + rnd(-4, 4), fy = P.ty + Math.abs(dev) * rnd(-26, 14) + rnd(-4, 4);
+  const zx = pick([105, 180, 255]), zy = pick([112, 160]);
+  let out = fx < GL + 6 || fx > GR - 6 || fy < GT + 2 || fy > GB;
+  let saved = false;
+  if (!out) saved = Math.abs(fx - zx) < 54 && Math.abs(fy - zy) < 46;
+  P.anim = { t: 0, fx, fy, zx, zy, out, saved }; sfx('kick');
+}
+function penFinish(r) {
+  P.res.push(r === 'goal' ? 1 : 0); if (r === 'goal') P.goals++;
+  P.msg = r === 'goal' ? 'GOL!' : r === 'save' ? 'SEYV!' : 'SIRTDAN!'; P.msgT = 1.3; P.net = r === 'goal' ? 1 : 0;
+  sfx(r === 'goal' ? 'goal' : r === 'save' ? 'save' : 'lose'); penPips();
+  P.n++; P.phase = 'result';
+  setTimeout(() => {
+    if (!P || P.done) return;
+    if (P.n >= 5) { penEnd(); return; }
+    P.phase = 'aim'; P.tx = P.ty = null; P.anim = null; P.msg = '';
+  }, 1400);
+}
+function penEnd() {
+  P.done = true; const coins = P.goals * 100 + (P.goals === 5 ? 500 : 0);
+  C.gain(coins, P.goals === 5 ? 5 : 0); sfx(P.goals >= 3 ? 'win' : 'lose');
+  C.openSheet(`<div class="resbox"><div class="verdict" style="color:${P.goals >= 3 ? 'var(--mint)' : 'var(--gold)'}">${P.goals}/5 gol</div>
+    <div class="reward"><span class="chip coin"><i></i>+${C.fmt(coins)}</span>${P.goals === 5 ? '<span class="chip gem"><i></i>+5</span>' : ''}</div>
+    <p style="margin:0;color:var(--muted)">${P.goals === 5 ? 'Mukammal seriya!' : 'Yana urib ko‘ring, mukofot gollarga qarab oshadi.'}</p>
+    <div style="display:flex;gap:10px"><button class="btn ghost wide" data-go="home">Bosh sahifa</button><button class="btn wide" id="penAgain">Yana</button></div></div>`, { center: true, lock: true });
+  $('#penAgain').addEventListener('click', () => { C.closeSheet(); C.RENDER.pen(); });
+}
+function penLoop() {
+  const cv = $('#penCv'); if (!cv || !P || C.G() === null) return;
+  let last = performance.now();
+  const f = (ts) => {
+    if (!$('#penCv') || !P) return; penRaf = requestAnimationFrame(f);
+    const dt = Math.min(.05, (ts - last) / 1000); last = ts;
+    if (P.phase === 'meter') { const m = Math.sin((performance.now() - P.t0) / 1000 * 3.1); $('#meterI').style.left = ((m + 1) / 2 * 100) + '%'; }
+    else $('#meterI').style.left = '50%';
+    $('#penHint').textContent = P.phase === 'aim' ? 'Darvoza ichiga bosib, nishonni tanlang' : P.phase === 'meter' ? 'Chiziq yashil joyda turganda “Zarba!” ni bosing' : '';
+    if (P.anim && P.phase === 'shot') { P.anim.t += dt / .62; if (P.anim.t >= 1) { P.anim.t = 1; P.phase = 'result0'; penFinish(P.anim.out ? 'out' : P.anim.saved ? 'save' : 'goal'); } }
+    if (P.msgT > 0) P.msgT -= dt; if (P.net > 0) P.net = Math.max(0, P.net - dt * .8);
+    drawPen(cv.getContext('2d'));
+  };
+  penRaf = requestAnimationFrame(f);
+}
+function drawPen(x) {
+  x.setTransform(2, 0, 0, 2, 0, 0);
+  // tribuna
+  const sky = x.createLinearGradient(0, 0, 0, 120); sky.addColorStop(0, '#2a1170'); sky.addColorStop(1, '#5a2bc0'); x.fillStyle = sky; x.fillRect(0, 0, PWD, 150);
+  for (let i = 0; i < 160; i++) { x.fillStyle = ['#ffc93c', '#25f0b0', '#ff3d85', '#3ea8ff', '#fff'][i % 5]; x.globalAlpha = .55; x.fillRect((i * 37) % PWD, 4 + ((i * 13) % 52), 3, 3); }
+  x.globalAlpha = 1;
+  // maysa
+  for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? '#1d9448' : '#22a553'; x.fillRect(0, 150 + i * 36, PWD, 37); }
+  x.strokeStyle = 'rgba(255,255,255,.8)'; x.lineWidth = 2; x.strokeRect(20, 150, PWD - 40, 200); x.beginPath(); x.arc(180, 372, 3, 0, 7); x.fillStyle = '#fff'; x.fill();
+  // darvoza ichi
+  x.fillStyle = 'rgba(0,0,0,.35)'; x.fillRect(GL, GT, GR - GL, GB - GT);
+  x.strokeStyle = 'rgba(255,255,255,.28)'; x.lineWidth = 1;
+  for (let i = GL; i <= GR; i += 12) { x.beginPath(); x.moveTo(i, GT); x.lineTo(i, GB); x.stroke(); }
+  for (let j = GT; j <= GB; j += 10) { x.beginPath(); x.moveTo(GL, j); x.lineTo(GR, j); x.stroke(); }
+  const a = P.anim;
+  // darvozabon
+  let gx = 180, gy = 168, rot = 0;
+  if (a) { const k = Math.min(1, a.t * 1.6), e = 1 - Math.pow(1 - k, 3); gx = 180 + (a.zx - 180) * e; gy = 168 + (a.zy - 168) * e; rot = (a.zx - 180) / 75 * .9 * e; }
+  else gx += Math.sin(performance.now() / 380) * 8;
+  x.save(); x.translate(gx, gy); x.rotate(rot);
+  x.fillStyle = '#ff7a2f'; x.strokeStyle = '#0006'; x.lineWidth = 2;
+  x.beginPath(); x.roundRect(-16, -8, 32, 42, 8); x.fill(); x.stroke();
+  x.fillStyle = '#ffd5a8'; x.beginPath(); x.arc(0, -17, 10, 0, 7); x.fill(); x.stroke();
+  x.fillStyle = '#ffc93c'; const sp = a ? 30 : 22;
+  x.beginPath(); x.arc(-sp, -6 - (a ? 8 : 0), 7, 0, 7); x.fill(); x.stroke(); x.beginPath(); x.arc(sp, -6 - (a ? 8 : 0), 7, 0, 7); x.fill(); x.stroke();
+  x.strokeStyle = '#ff7a2f'; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(-12, 0); x.lineTo(-sp, -6 - (a ? 8 : 0)); x.moveTo(12, 0); x.lineTo(sp, -6 - (a ? 8 : 0)); x.stroke();
+  x.fillStyle = '#1b1b3a'; x.fillRect(-14, 34, 11, 14); x.fillRect(3, 34, 11, 14);
+  x.restore();
+  // nishon
+  if (P.tx != null && (P.phase === 'meter')) {
+    const m = Math.sin((performance.now() - P.t0) / 1000 * 3.1), r = 10 + Math.abs(m) * 14;
+    x.strokeStyle = '#25f0b0'; x.lineWidth = 2.5; x.beginPath(); x.arc(P.tx, P.ty, 10, 0, 7); x.stroke();
+    x.strokeStyle = 'rgba(37,240,176,.5)'; x.beginPath(); x.arc(P.tx, P.ty, r + 6, 0, 7); x.stroke();
+    x.beginPath(); x.moveTo(P.tx - 16, P.ty); x.lineTo(P.tx + 16, P.ty); x.moveTo(P.tx, P.ty - 16); x.lineTo(P.tx, P.ty + 16); x.stroke();
+  }
+  // to'p
+  let bx = 180, by = 372, bs = 1;
+  if (a) { const t = a.t, e = 1 - Math.pow(1 - t, 2); bx = 180 + (a.fx - 180) * e; by = 372 + (a.fy - 372) * e - Math.sin(t * Math.PI) * 30; bs = 1 - .62 * e; }
+  else if (P.msgT > 0 && P.res.length) { bx = 180; by = 372; }
+  x.fillStyle = 'rgba(0,0,0,.3)'; x.beginPath(); x.ellipse(bx, (a ? 372 + (a.fy - 372) * (1 - Math.pow(1 - a.t, 2)) : 372) + 14 * bs, 13 * bs, 5 * bs, 0, 0, 7); x.fill();
+  x.fillStyle = '#fff'; x.strokeStyle = '#222'; x.lineWidth = 2; x.beginPath(); x.arc(bx, by, 14 * bs, 0, 7); x.fill(); x.stroke();
+  x.fillStyle = '#222'; x.beginPath(); x.arc(bx, by, 5 * bs, 0, 7); x.fill();
+  // virilgan to'r
+  if (P.net > 0) { x.strokeStyle = `rgba(255,255,255,${P.net})`; x.lineWidth = 2; x.strokeRect(GL + 3, GT + 3, GR - GL - 6, GB - GT - 6); }
+  // dastak (ustun, to'sin)
+  x.strokeStyle = '#fff'; x.lineWidth = 7; x.lineCap = 'round'; x.beginPath(); x.moveTo(GL, GB); x.lineTo(GL, GT); x.lineTo(GR, GT); x.lineTo(GR, GB); x.stroke();
+  // xabar
+  if (P.msgT > 0) {
+    x.save(); x.globalAlpha = Math.min(1, P.msgT * 2); x.textAlign = 'center'; x.font = '800 64px Barlow Condensed, Arial Narrow, sans-serif';
+    x.fillStyle = P.msg === 'GOL!' ? '#ffc93c' : '#ff3d85'; x.strokeStyle = '#000'; x.lineWidth = 6; x.strokeText(P.msg, 180, 290); x.fillText(P.msg, 180, 290); x.restore();
+  }
+}
+})();
+
+</script>
+</body>
+</html>
